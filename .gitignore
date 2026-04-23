@@ -41,3 +41,8 @@ node_modules/
 client/.env
 server/.env
 dist/
+node_modules/
+.env
+client/.env
+server/.env
+dist/
