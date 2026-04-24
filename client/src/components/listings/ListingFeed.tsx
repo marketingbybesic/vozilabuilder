@@ -6,6 +6,7 @@ import {
   Search, Box, Clock, ArrowDown10, ArrowUp01, Eye, ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { navigationMenu } from '../../config/taxonomy';
+import { globalFilters, categoryFilters, FilterDefinition } from '../../config/filters';
 import { Listing } from '../../types';
 
 const ITEMS_PER_PAGE = 9;
@@ -210,9 +211,15 @@ const ListingCard = ({ car }: { car: Listing }) => {
         <div className="mt-auto pt-5 border-t border-border/40 flex items-end justify-between">
           <div>
             <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1">Cijena</p>
-            <p className="text-2xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
-              {Number(car.price).toLocaleString('hr-HR')} <span className="text-base font-bold text-slate-400 ml-0.5">{car.currency || '€'}</span>
-            </p>
+            {Number(car.price) === 0 ? (
+              <p className="text-xl font-black text-slate-900 dark:text-slate-100 tracking-tight italic">
+                Na upit
+              </p>
+            ) : (
+              <p className="text-2xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
+                {Number(car.price).toLocaleString('hr-HR')} <span className="text-base font-bold text-slate-400 ml-0.5">{car.currency || '€'}</span>
+              </p>
+            )}
           </div>
           
           {/* Rent or Buy Badge - Dynamic based on category or attributes later */}
@@ -237,10 +244,11 @@ export const ListingFeed = () => {
   const [hasMore, setHasMore] = useState(true);
   
   const [sortBy, setSortBy] = useState('newest');
-  const [filters, setFilters] = useState({
+  const [filters, setFilters] = useState<Record<string, string>>({
     priceMin: '', priceMax: '',
     yearMin: '', yearMax: '',
-    mileageMax: '', powerMin: ''
+    mileageMax: '', powerMin: '',
+    lat: '', lng: '', radiusKm: ''
   });
 
   const currentCategory = navigationMenu.find(c => c.slug === categorySlug);
@@ -251,29 +259,53 @@ export const ListingFeed = () => {
     try {
       if (!isLoadMore) setLoading(true);
       
-      let query = supabase
-        .from('listings')
-        .select('*, categories!inner(slug), listing_images(id, url, is_primary, sort_order)', { count: 'exact' })
-        .eq('status', 'active');
-
-      // Filter by category slug from query params
-      if (categorySlug) {
-        const mappedCategory = navigationMenu.find(c => c.slug === categorySlug);
-        if (mappedCategory) {
-          // For now, use the slug directly - update this when DB schema is migrated
-          query = query.eq('categories.slug', categorySlug);
-        }
+      // 1. Determine if we are doing a radius search or a standard search
+      let query: any;
+      if (filters.radiusKm && filters.lat && filters.lng) {
+        // Use our custom PostGIS RPC function
+        query = supabase.rpc('search_listings_by_radius', {
+          search_lat: parseFloat(filters.lat),
+          search_lng: parseFloat(filters.lng),
+          radius_km: parseFloat(filters.radiusKm)
+        });
+      } else {
+        // Standard table query
+        query = supabase.from('listings').select('*, categories!inner(slug), listing_images(id, url, is_primary, sort_order)', { count: 'exact' });
       }
+
+      // Base Filters
+      query = query.eq('status', 'active');
+      if (categorySlug) query = query.eq('categories.slug', categorySlug);
+
+      // Global Numeric Filters
       if (filters.priceMin) query = query.gte('price', parseInt(filters.priceMin));
       if (filters.priceMax) query = query.lte('price', parseInt(filters.priceMax));
-      if (filters.yearMin) query = query.gte('year', parseInt(filters.yearMin));
-      if (filters.yearMax) query = query.lte('year', parseInt(filters.yearMax));
-      if (filters.mileageMax) query = query.lte('mileage', parseInt(filters.mileageMax));
+
+      // JSONB DYNAMIC FILTERS (The Magic)
+      // We loop over the filters state. If the key isn't price/lat/lng/radius, it's a JSONB attribute!
+      Object.entries(filters).forEach(([key, value]) => {
+        if (!value || ['priceMin', 'priceMax', 'lat', 'lng', 'radiusKm'].includes(key)) return;
+        
+        // If it's a min/max range (e.g., yearMin, mileageMax)
+        if (key.endsWith('Min')) {
+          const attr = key.replace('Min', '');
+          query = query.gte(`attributes->>${attr}`, parseInt(value as string));
+        } else if (key.endsWith('Max')) {
+          const attr = key.replace('Max', '');
+          query = query.lte(`attributes->>${attr}`, parseInt(value as string));
+        } 
+        // If it's an exact match (e.g., fuel: 'Diesel', condition: 'Novo')
+        else {
+          query = query.eq(`attributes->>${key}`, value);
+        }
+      });
       
+      // Sorting
       if (sortBy === 'price_asc') query = query.order('price', { ascending: true });
       else if (sortBy === 'price_desc') query = query.order('price', { ascending: false });
       else query = query.order('created_at', { ascending: false });
 
+      // Pagination
       const from = (isLoadMore ? page + 1 : 0) * ITEMS_PER_PAGE;
       const to = from + ITEMS_PER_PAGE - 1;
       query = query.range(from, to);
@@ -301,10 +333,74 @@ export const ListingFeed = () => {
     fetchListings();
   }, [categorySlug, sortBy, fetchListings]);
 
-  const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFilters(prev => ({ ...prev, [name]: value }));
   };
+
+  // Dynamic filter input renderer
+  const renderFilterInput = (filter: FilterDefinition) => {
+    if (filter.type === 'range') {
+      return (
+        <div className="flex gap-2">
+          <input 
+            type="number" 
+            name={`${filter.id}Min`} 
+            placeholder="Od" 
+            value={filters[`${filter.id}Min`] || ''} 
+            onChange={handleFilterChange} 
+            className="w-full bg-background/50 border border-border/60 rounded-lg px-3 py-2 text-xs focus:ring-1 focus:ring-primary outline-none transition-all" 
+          />
+          <input 
+            type="number" 
+            name={`${filter.id}Max`} 
+            placeholder="Do" 
+            value={filters[`${filter.id}Max`] || ''} 
+            onChange={handleFilterChange} 
+            className="w-full bg-background/50 border border-border/60 rounded-lg px-3 py-2 text-xs focus:ring-1 focus:ring-primary outline-none transition-all" 
+          />
+        </div>
+      );
+    }
+    if (filter.type === 'select') {
+      return (
+        <select 
+          name={filter.id} 
+          value={filters[filter.id] || ''} 
+          onChange={handleFilterChange} 
+          className="w-full bg-background/50 border border-border/60 rounded-lg px-3 py-2 text-xs focus:ring-1 focus:ring-primary appearance-none outline-none transition-all"
+        >
+          <option value="">Sve</option>
+          {filter.options?.map(opt => (
+            <option key={opt.value} value={opt.value}>{opt.label}</option>
+          ))}
+        </select>
+      );
+    }
+    if (filter.type === 'radio') {
+      return (
+        <div className="flex gap-4">
+          {filter.options?.map(opt => (
+            <label key={opt.value} className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300">
+              <input 
+                type="radio" 
+                name={filter.id} 
+                value={opt.value} 
+                checked={filters[filter.id] === String(opt.value)} 
+                onChange={handleFilterChange} 
+                className="accent-primary" 
+              />
+              {opt.label}
+            </label>
+          ))}
+        </div>
+      );
+    }
+    return null;
+  };
+
+  // Get category-specific filters
+  const currentCatFilters = categorySlug ? categoryFilters[categorySlug] : categoryFilters['osobni-automobili'];
 
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 max-w-[1700px] flex flex-col xl:flex-row gap-8 lg:gap-12">
@@ -322,37 +418,72 @@ export const ListingFeed = () => {
             </div>
 
             <div className="space-y-2">
-              <Accordion title="Osnovno" defaultOpen={true}>
-                <div className="space-y-5">
-                  <div className="space-y-3">
-                    <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300">Cijena (€)</label>
-                    <div className="flex gap-2">
-                      <input type="number" name="priceMin" placeholder="Od" value={filters.priceMin} onChange={handleFilterChange} className="w-full bg-background/50 border border-border/60 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-primary transition-all placeholder:text-slate-400" />
-                      <input type="number" name="priceMax" placeholder="Do" value={filters.priceMax} onChange={handleFilterChange} className="w-full bg-background/50 border border-border/60 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-primary transition-all placeholder:text-slate-400" />
-                    </div>
+              {/* Accordion 1: Lokacija (Radius Search) */}
+              <Accordion title="Lokacija" defaultOpen={false}>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Grad</label>
+                    <select 
+                      name="locationSelect"
+                      onChange={(e) => {
+                        const [lat, lng] = e.target.value.split(',');
+                        setFilters(prev => ({ ...prev, lat, lng }));
+                      }}
+                      className="w-full bg-background/50 border border-border/60 rounded-lg px-3 py-2 text-xs focus:ring-1 focus:ring-primary appearance-none outline-none transition-all"
+                    >
+                      <option value="">Odaberi grad...</option>
+                      <option value="45.815,15.981">Zagreb</option>
+                      <option value="43.508,16.440">Split</option>
+                      <option value="45.327,14.442">Rijeka</option>
+                      <option value="42.650,18.094">Dubrovnik</option>
+                    </select>
                   </div>
-                  <div className="space-y-3">
-                    <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300">Godina proizvodnje</label>
-                    <div className="flex gap-2">
-                      <input type="number" name="yearMin" placeholder="Od" value={filters.yearMin} onChange={handleFilterChange} className="w-full bg-background/50 border border-border/60 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-primary transition-all placeholder:text-slate-400" />
-                      <input type="number" name="yearMax" placeholder="Do" value={filters.yearMax} onChange={handleFilterChange} className="w-full bg-background/50 border border-border/60 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-primary transition-all placeholder:text-slate-400" />
-                    </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                      Radijus: {filters.radiusKm || 50} km
+                    </label>
+                    <input 
+                      type="range" 
+                      name="radiusKm"
+                      min="0" 
+                      max="100" 
+                      value={filters.radiusKm || 50}
+                      onChange={handleFilterChange}
+                      className="w-full accent-primary"
+                    />
                   </div>
                 </div>
               </Accordion>
 
-              <Accordion title="Karakteristike" defaultOpen={true}>
-                <div className="space-y-5">
-                  <div className="space-y-3">
-                    <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300">Max. Kilometraža</label>
-                    <input type="number" name="mileageMax" placeholder="Npr. 150000" value={filters.mileageMax} onChange={handleFilterChange} className="w-full bg-background/50 border border-border/60 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-primary transition-all placeholder:text-slate-400" />
-                  </div>
-                  <div className="space-y-3">
-                    <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300">Min. Snaga (KS)</label>
-                    <input type="number" name="powerMin" placeholder="Npr. 150" value={filters.powerMin} onChange={handleFilterChange} className="w-full bg-background/50 border border-border/60 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-primary transition-all placeholder:text-slate-400" />
-                  </div>
+              {/* Accordion 2: Osnovno (Global Filters) */}
+              <Accordion title="Osnovno" defaultOpen={true}>
+                <div className="space-y-4">
+                  {globalFilters.map((filter) => (
+                    <div key={filter.id} className="space-y-2">
+                      <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                        {filter.label} {filter.unit && `(${filter.unit})`}
+                      </label>
+                      {renderFilterInput(filter)}
+                    </div>
+                  ))}
                 </div>
               </Accordion>
+
+              {/* Accordion 3: Karakteristike (Category-Specific Filters) */}
+              {currentCatFilters && currentCatFilters.length > 0 && (
+                <Accordion title="Karakteristike" defaultOpen={true}>
+                  <div className="space-y-4">
+                    {currentCatFilters.map((filter) => (
+                      <div key={filter.id} className="space-y-2">
+                        <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                          {filter.label} {filter.unit && `(${filter.unit})`}
+                        </label>
+                        {renderFilterInput(filter)}
+                      </div>
+                    ))}
+                  </div>
+                </Accordion>
+              )}
 
               <button onClick={() => fetchListings(false)} className="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-black uppercase tracking-widest text-[11px] py-4 rounded-xl hover:scale-[1.02] transition-transform duration-300 shadow-xl shadow-slate-900/10 dark:shadow-white/10 mt-6">
                 Primijeni Filtere

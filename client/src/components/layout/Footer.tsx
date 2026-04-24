@@ -13,21 +13,18 @@ export const Footer = () => {
           {/* Column 1: Logo, Tagline, and Contact */}
           <div className="flex flex-col items-center md:items-start space-y-5 h-full">
             
-            {/* Logo - EXACT 1:1 match with the Header (No dot, identical size/weight) */}
-            <Link to="/" className="flex flex-col items-center hover:opacity-90 transition-opacity duration-300 group mt-1">
+            {/* Logo */}
+            <Link to="/" className="flex items-center justify-center hover:opacity-90 transition-opacity duration-300 group">
               <img 
                 src="/vozilahrlogo-light.svg" 
                 alt="Vozila hr logo" 
-                className="h-5 lg:h-6 w-auto object-contain transform group-hover:scale-105 transition-transform duration-300 block dark:hidden"
+                className="h-6 lg:h-7 w-auto object-contain transform group-hover:scale-105 transition-transform duration-300 block dark:hidden"
               />
               <img 
                 src="/vozilahrlogo-dark.svg" 
                 alt="Vozila hr logo dark" 
-                className="h-5 lg:h-6 w-auto object-contain transform group-hover:scale-105 transition-transform duration-300 hidden dark:block"
+                className="h-6 lg:h-7 w-auto object-contain transform group-hover:scale-105 transition-transform duration-300 hidden dark:block"
               />
-              <span className="text-[10px] lg:text-[11px] font-bold uppercase tracking-[0.3em] mt-1.5 text-slate-900 dark:text-slate-300 transition-colors duration-300">
-                VOZILA HR
-              </span>
             </Link>
             
             <p className="text-sm font-medium text-slate-500 dark:text-slate-400 leading-relaxed max-w-[260px] mx-auto md:mx-0 flex-grow">
