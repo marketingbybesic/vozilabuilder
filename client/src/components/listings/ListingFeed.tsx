@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, Link } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { 
   Calendar, Gauge, Zap, SlidersHorizontal, ChevronDown, ChevronUp, 
@@ -139,20 +139,29 @@ const ListingCard = ({ car }: { car: Listing }) => {
 
   return (
     <div 
-      className="group flex flex-col bg-card border border-border/40 rounded-2xl overflow-hidden hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-700 ease-premium cursor-pointer h-full"
+      className="group flex flex-col bg-card border border-border/40 rounded-2xl overflow-hidden hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-700 ease-premium cursor-pointer h-full shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1)]"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => { setIsHovered(false); setCurrentImgIdx(0); }}
     >
-      {/* Image Wrapper with Carousel */}
-      <div className="relative aspect-[4/3] bg-slate-100/50 dark:bg-slate-800/30 flex items-center justify-center overflow-hidden">
+      {/* Image Wrapper with Professional Studio Effect */}
+      <div className="relative aspect-[4/3] bg-slate-100 dark:bg-slate-900 flex items-center justify-center overflow-hidden">
         {displayImg ? (
-          <img 
-            src={displayImg} 
-            alt={car.title} 
-            className={`absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-premium ${isHovered && sortedImages.length <= 1 ? 'scale-110' : ''}`} 
-          />
+          <>
+            {/* Background Layer: Blurred Stage */}
+            <img 
+              src={displayImg} 
+              alt={`${car.title} background`}
+              className="absolute inset-0 w-full h-full object-cover blur-2xl opacity-30 transition-transform duration-1000 ease-premium"
+            />
+            {/* Foreground Layer: Centered Car */}
+            <img 
+              src={displayImg} 
+              alt={car.title} 
+              className={`absolute inset-0 w-full h-full object-contain p-2 transition-transform duration-1000 ease-premium ${isHovered && sortedImages.length <= 1 ? 'scale-110' : ''}`} 
+            />
+          </>
         ) : (
-          <img src="/vozilahrlogo.svg" alt="Nema slike" className="h-10 w-auto opacity-10 dark:opacity-20 transform group-hover:scale-110 transition-transform duration-700 ease-premium" />
+          <img src="/vozilahrlogo.svg" alt="Nema slike" className="h-10 w-auto opacity-10 dark:opacity-20 transform group-hover:scale-110 transition-transform duration-1000 ease-premium" />
         )}
         
         {/* Navigation Arrows (Only show if multiple images and hovered) */}
@@ -212,7 +221,7 @@ const ListingCard = ({ car }: { car: Listing }) => {
           <div>
             <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1">Cijena</p>
             {Number(car.price) === 0 ? (
-              <p className="text-xl font-black text-slate-900 dark:text-slate-100 tracking-tight italic">
+              <p className="text-2xl font-black italic text-primary tracking-tight drop-shadow-sm">
                 Na upit
               </p>
             ) : (
@@ -338,60 +347,93 @@ export const ListingFeed = () => {
     setFilters(prev => ({ ...prev, [name]: value }));
   };
 
-  // Dynamic filter input renderer
+  // Dynamic filter input renderer with visual chips
   const renderFilterInput = (filter: FilterDefinition) => {
     if (filter.type === 'range') {
+      // Histograph bars (dummy data visualization)
+      const histogramHeights = [40, 60, 80, 100, 90, 70, 85, 95, 75, 50];
+      
       return (
-        <div className="flex gap-2">
-          <input 
-            type="number" 
-            name={`${filter.id}Min`} 
-            placeholder="Od" 
-            value={filters[`${filter.id}Min`] || ''} 
-            onChange={handleFilterChange} 
-            className="w-full bg-background/50 border border-border/60 rounded-lg px-3 py-2 text-xs focus:ring-1 focus:ring-primary outline-none transition-all" 
-          />
-          <input 
-            type="number" 
-            name={`${filter.id}Max`} 
-            placeholder="Do" 
-            value={filters[`${filter.id}Max`] || ''} 
-            onChange={handleFilterChange} 
-            className="w-full bg-background/50 border border-border/60 rounded-lg px-3 py-2 text-xs focus:ring-1 focus:ring-primary outline-none transition-all" 
-          />
+        <div className="space-y-3">
+          {/* Mini Histogram */}
+          <div className="flex items-end justify-between gap-0.5 h-8 px-1">
+            {histogramHeights.map((height, idx) => (
+              <div 
+                key={idx}
+                className="flex-1 bg-primary/20 rounded-t transition-all duration-300 hover:bg-primary/40"
+                style={{ height: `${height}%` }}
+              />
+            ))}
+          </div>
+          
+          {/* Range Inputs */}
+          <div className="flex gap-2">
+            <input 
+              type="number" 
+              name={`${filter.id}Min`} 
+              placeholder="Od" 
+              value={filters[`${filter.id}Min`] || ''} 
+              onChange={handleFilterChange} 
+              className="w-full bg-background/50 border border-border/60 rounded-lg px-3 py-2 text-xs focus:ring-1 focus:ring-primary outline-none transition-all" 
+            />
+            <input 
+              type="number" 
+              name={`${filter.id}Max`} 
+              placeholder="Do" 
+              value={filters[`${filter.id}Max`] || ''} 
+              onChange={handleFilterChange} 
+              className="w-full bg-background/50 border border-border/60 rounded-lg px-3 py-2 text-xs focus:ring-1 focus:ring-primary outline-none transition-all" 
+            />
+          </div>
         </div>
       );
     }
     if (filter.type === 'select') {
+      // Choice Chips instead of dropdown
       return (
-        <select 
-          name={filter.id} 
-          value={filters[filter.id] || ''} 
-          onChange={handleFilterChange} 
-          className="w-full bg-background/50 border border-border/60 rounded-lg px-3 py-2 text-xs focus:ring-1 focus:ring-primary appearance-none outline-none transition-all"
-        >
-          <option value="">Sve</option>
+        <div className="flex flex-wrap gap-2">
+          <button
+            onClick={() => setFilters(prev => ({ ...prev, [filter.id]: '' }))}
+            className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-200 ${
+              !filters[filter.id] 
+                ? 'bg-primary text-white border-2 border-primary' 
+                : 'bg-secondary/50 border-2 border-border/40 text-muted-foreground hover:border-primary/50'
+            }`}
+          >
+            Sve
+          </button>
           {filter.options?.map(opt => (
-            <option key={opt.value} value={opt.value}>{opt.label}</option>
+            <button
+              key={opt.value}
+              onClick={() => setFilters(prev => ({ ...prev, [filter.id]: String(opt.value) }))}
+              className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-200 ${
+                filters[filter.id] === String(opt.value)
+                  ? 'bg-primary text-white border-2 border-primary'
+                  : 'bg-secondary/50 border-2 border-border/40 text-muted-foreground hover:border-primary/50'
+              }`}
+            >
+              {opt.label}
+            </button>
           ))}
-        </select>
+        </div>
       );
     }
     if (filter.type === 'radio') {
+      // Choice Chips for radio too
       return (
-        <div className="flex gap-4">
+        <div className="flex flex-wrap gap-2">
           {filter.options?.map(opt => (
-            <label key={opt.value} className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300">
-              <input 
-                type="radio" 
-                name={filter.id} 
-                value={opt.value} 
-                checked={filters[filter.id] === String(opt.value)} 
-                onChange={handleFilterChange} 
-                className="accent-primary" 
-              />
+            <button
+              key={opt.value}
+              onClick={() => setFilters(prev => ({ ...prev, [filter.id]: String(opt.value) }))}
+              className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-200 ${
+                filters[filter.id] === String(opt.value)
+                  ? 'bg-primary text-white border-2 border-primary'
+                  : 'bg-secondary/50 border-2 border-border/40 text-muted-foreground hover:border-primary/50'
+              }`}
+            >
               {opt.label}
-            </label>
+            </button>
           ))}
         </div>
       );
@@ -519,9 +561,82 @@ export const ListingFeed = () => {
           />
         ) : (
           <>
+            {/* Quick Filters Bar */}
+            <div className="mb-8 p-4 bg-card/60 backdrop-blur-xl border border-border/40 rounded-2xl shadow-sm">
+              <div className="flex items-center gap-3 mb-3">
+                <SlidersHorizontal className="w-4 h-4 text-primary" />
+                <h3 className="text-xs font-black uppercase tracking-widest text-muted-foreground">
+                  Brzi Filteri
+                </h3>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  onClick={() => setFilters(prev => ({ ...prev, transmission: 'Automatik' }))}
+                  className={`px-4 py-2 rounded-full text-xs font-bold transition-all duration-200 ${
+                    filters.transmission === 'Automatik'
+                      ? 'bg-primary text-white border-2 border-primary shadow-lg'
+                      : 'bg-secondary/50 border-2 border-border/40 text-muted-foreground hover:border-primary/50 hover:scale-105'
+                  }`}
+                >
+                  🚗 Samo Automatik
+                </button>
+                <button
+                  onClick={() => setFilters(prev => ({ ...prev, priceMax: '20000' }))}
+                  className={`px-4 py-2 rounded-full text-xs font-bold transition-all duration-200 ${
+                    filters.priceMax === '20000'
+                      ? 'bg-primary text-white border-2 border-primary shadow-lg'
+                      : 'bg-secondary/50 border-2 border-border/40 text-muted-foreground hover:border-primary/50 hover:scale-105'
+                  }`}
+                >
+                  💰 Ispod 20.000€
+                </button>
+                <button
+                  onClick={() => setFilters(prev => ({ ...prev, yearMin: '2020' }))}
+                  className={`px-4 py-2 rounded-full text-xs font-bold transition-all duration-200 ${
+                    filters.yearMin === '2020'
+                      ? 'bg-primary text-white border-2 border-primary shadow-lg'
+                      : 'bg-secondary/50 border-2 border-border/40 text-muted-foreground hover:border-primary/50 hover:scale-105'
+                  }`}
+                >
+                  ✨ Novi oglasi (2020+)
+                </button>
+                <button
+                  onClick={() => setFilters(prev => ({ ...prev, fuel: 'Struja' }))}
+                  className={`px-4 py-2 rounded-full text-xs font-bold transition-all duration-200 ${
+                    filters.fuel === 'Struja'
+                      ? 'bg-primary text-white border-2 border-primary shadow-lg'
+                      : 'bg-secondary/50 border-2 border-border/40 text-muted-foreground hover:border-primary/50 hover:scale-105'
+                  }`}
+                >
+                  ⚡ Električni
+                </button>
+                <button
+                  onClick={() => setFilters(prev => ({ ...prev, mileageMax: '50000' }))}
+                  className={`px-4 py-2 rounded-full text-xs font-bold transition-all duration-200 ${
+                    filters.mileageMax === '50000'
+                      ? 'bg-primary text-white border-2 border-primary shadow-lg'
+                      : 'bg-secondary/50 border-2 border-border/40 text-muted-foreground hover:border-primary/50 hover:scale-105'
+                  }`}
+                >
+                  🎯 Mala kilometraža
+                </button>
+                {/* Clear All Filters */}
+                {Object.values(filters).some(v => v) && (
+                  <button
+                    onClick={() => setFilters({ priceMin: '', priceMax: '', yearMin: '', yearMax: '', mileageMax: '', powerMin: '', lat: '', lng: '', radiusKm: '' })}
+                    className="px-4 py-2 rounded-full text-xs font-bold bg-red-500/10 border-2 border-red-500/40 text-red-600 dark:text-red-400 hover:bg-red-500/20 transition-all duration-200"
+                  >
+                    ✕ Očisti sve
+                  </button>
+                )}
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 2xl:grid-cols-3 gap-6 xl:gap-8">
               {cars.map((car) => (
-                <ListingCard key={car.id} car={car} />
+                <Link key={car.id} to={`/listing/${car.id}`}>
+                  <ListingCard car={car} />
+                </Link>
               ))}
             </div>
             

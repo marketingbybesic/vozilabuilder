@@ -5,6 +5,8 @@ import { MobileBottomNav } from './components/layout/MobileBottomNav';
 import { Home } from './pages/Home';
 import { ListingFeed } from './components/listings/ListingFeed';
 import { ListingWizard } from './components/listings/ListingWizard';
+import { CreateListing } from './components/listings/CreateListing';
+import { ListingDetail } from './components/listings/ListingDetail';
 
 function App() {
   return (
@@ -16,6 +18,8 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/predaj-oglas" element={<ListingWizard />} />
+            <Route path="/kreiraj-oglas" element={<CreateListing />} />
+            <Route path="/listing/:id" element={<ListingDetail />} />
             <Route path="/:categorySlug" element={<ListingFeed />} />
           </Routes>
         </main>

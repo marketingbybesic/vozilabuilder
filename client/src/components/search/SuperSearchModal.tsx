@@ -61,60 +61,96 @@ export const SuperSearchModal = ({ open, onOpenChange }: SuperSearchModalProps) 
     setAdvancedFilters(prev => ({ ...prev, [name]: value }));
   };
 
-  // Dynamic filter input renderer for modal
+  // Dynamic filter input renderer for modal with visual chips
   const renderModalFilterInput = (filter: FilterDefinition) => {
     if (filter.type === 'range') {
+      // Histograph bars (dummy data visualization)
+      const histogramHeights = [40, 60, 80, 100, 90, 70, 85, 95, 75, 50];
+      
       return (
-        <div className="flex gap-2">
-          <input 
-            type="number" 
-            name={`${filter.id}Min`} 
-            placeholder="Od" 
-            value={advancedFilters[`${filter.id}Min`] || ''} 
-            onChange={handleFilterChange} 
-            className="w-full bg-secondary/50 border border-border/50 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary outline-none transition-all" 
-          />
-          <input 
-            type="number" 
-            name={`${filter.id}Max`} 
-            placeholder="Do" 
-            value={advancedFilters[`${filter.id}Max`] || ''} 
-            onChange={handleFilterChange} 
-            className="w-full bg-secondary/50 border border-border/50 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary outline-none transition-all" 
-          />
+        <div className="space-y-3">
+          {/* Mini Histogram */}
+          <div className="flex items-end justify-between gap-0.5 h-8 px-1">
+            {histogramHeights.map((height, idx) => (
+              <div 
+                key={idx}
+                className="flex-1 bg-primary/20 rounded-t transition-all duration-300 hover:bg-primary/40"
+                style={{ height: `${height}%` }}
+              />
+            ))}
+          </div>
+          
+          {/* Range Inputs */}
+          <div className="flex gap-2">
+            <input 
+              type="number" 
+              name={`${filter.id}Min`} 
+              placeholder="Od" 
+              value={advancedFilters[`${filter.id}Min`] || ''} 
+              onChange={handleFilterChange} 
+              className="w-full bg-secondary/50 border border-border/50 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary outline-none transition-all" 
+            />
+            <input 
+              type="number" 
+              name={`${filter.id}Max`} 
+              placeholder="Do" 
+              value={advancedFilters[`${filter.id}Max`] || ''} 
+              onChange={handleFilterChange} 
+              className="w-full bg-secondary/50 border border-border/50 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary outline-none transition-all" 
+            />
+          </div>
         </div>
       );
     }
     if (filter.type === 'select') {
+      // Choice Chips instead of dropdown
       return (
-        <select 
-          name={filter.id} 
-          value={advancedFilters[filter.id] || ''} 
-          onChange={handleFilterChange} 
-          className="w-full bg-secondary/50 border border-border/50 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary appearance-none outline-none transition-all"
-        >
-          <option value="">Sve</option>
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={() => setAdvancedFilters(prev => ({ ...prev, [filter.id]: '' }))}
+            className={`px-4 py-2 rounded-full text-sm font-bold transition-all duration-200 ${
+              !advancedFilters[filter.id] 
+                ? 'bg-primary text-white border-2 border-primary' 
+                : 'bg-secondary/50 border-2 border-border/40 text-muted-foreground hover:border-primary/50'
+            }`}
+          >
+            Sve
+          </button>
           {filter.options?.map(opt => (
-            <option key={opt.value} value={opt.value}>{opt.label}</option>
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => setAdvancedFilters(prev => ({ ...prev, [filter.id]: String(opt.value) }))}
+              className={`px-4 py-2 rounded-full text-sm font-bold transition-all duration-200 ${
+                advancedFilters[filter.id] === String(opt.value)
+                  ? 'bg-primary text-white border-2 border-primary'
+                  : 'bg-secondary/50 border-2 border-border/40 text-muted-foreground hover:border-primary/50'
+              }`}
+            >
+              {opt.label}
+            </button>
           ))}
-        </select>
+        </div>
       );
     }
     if (filter.type === 'radio') {
+      // Choice Chips for radio too
       return (
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-2">
           {filter.options?.map(opt => (
-            <label key={opt.value} className="flex items-center gap-2 text-sm text-foreground cursor-pointer">
-              <input 
-                type="radio" 
-                name={filter.id} 
-                value={opt.value} 
-                checked={advancedFilters[filter.id] === String(opt.value)} 
-                onChange={handleFilterChange} 
-                className="accent-primary" 
-              />
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => setAdvancedFilters(prev => ({ ...prev, [filter.id]: String(opt.value) }))}
+              className={`px-4 py-2 rounded-full text-sm font-bold transition-all duration-200 ${
+                advancedFilters[filter.id] === String(opt.value)
+                  ? 'bg-primary text-white border-2 border-primary'
+                  : 'bg-secondary/50 border-2 border-border/40 text-muted-foreground hover:border-primary/50'
+              }`}
+            >
               {opt.label}
-            </label>
+            </button>
           ))}
         </div>
       );

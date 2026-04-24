@@ -80,16 +80,16 @@ export const Header = () => {
           </div>
 
           {/* Predaj oglas Button */}
-          <button className="hidden md:flex items-center gap-2 ml-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg font-bold uppercase tracking-widest text-xs hover:scale-105 transition-all duration-300 shadow-lg whitespace-nowrap">
+          <Link to="/predaj-oglas" className="hidden md:flex items-center gap-2 ml-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg font-bold uppercase tracking-widest text-xs hover:scale-105 transition-all duration-300 shadow-lg whitespace-nowrap">
             <Plus className="h-4 w-4" />
             Predaj oglas
-          </button>
+          </Link>
 
           {/* Mobile: Predaj oglas Button (Compact) */}
-          <button className="flex md:hidden items-center gap-1.5 px-3 py-1.5 bg-primary text-primary-foreground rounded-lg font-bold uppercase tracking-widest text-[10px] hover:scale-105 transition-all duration-300 shadow-lg whitespace-nowrap">
+          <Link to="/predaj-oglas" className="flex md:hidden items-center gap-1.5 px-3 py-1.5 bg-primary text-primary-foreground rounded-lg font-bold uppercase tracking-widest text-[10px] hover:scale-105 transition-all duration-300 shadow-lg whitespace-nowrap">
             <Plus className="h-3.5 w-3.5" />
             Oglas
-          </button>
+          </Link>
 
           {/* Mobile Hamburger */}
           <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="lg:hidden p-1 text-foreground hover:text-primary transition-colors ml-1">
@@ -227,10 +227,10 @@ export const Header = () => {
               );
             })}
             
-            <button className="flex items-center justify-center gap-2 px-6 py-4 mt-4 bg-primary text-primary-foreground rounded-lg font-bold uppercase tracking-widest text-sm hover:scale-105 transition-all duration-300 shadow-lg">
+            <Link to="/predaj-oglas" className="flex items-center justify-center gap-2 px-6 py-4 mt-4 bg-primary text-primary-foreground rounded-lg font-bold uppercase tracking-widest text-sm hover:scale-105 transition-all duration-300 shadow-lg">
               <Plus className="h-5 w-5" />
               Predaj oglas
-            </button>
+            </Link>
           </nav>
         </div>
       )}
