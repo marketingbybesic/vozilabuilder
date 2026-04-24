@@ -8,39 +8,39 @@ export const Hero = () => {
 
   return (
     <>
-      <section className="relative w-full min-h-[90vh] flex items-center overflow-hidden">
-        {/* Background Image */}
+      <section className="relative w-full min-h-[70vh] flex items-center overflow-hidden">
+        {/* Background Image - Ferrari Always Visible */}
         <div className="absolute inset-0 z-0">
           <img
             src="https://images.unsplash.com/photo-1614200187524-dc4b892acf16?q=80&w=2000&auto=format&fit=crop"
             alt="Premium vehicle showcase"
-            className="w-full h-full object-cover object-center"
+            className="w-full h-full object-cover object-[center_bottom]"
           />
         </div>
 
         {/* Enhanced Gradient Overlay - Stronger on Left */}
         <div className="absolute inset-0 z-10 bg-gradient-to-r from-black/80 via-black/40 to-transparent" />
 
-        {/* Content Wrapper - Increased Top Padding */}
-        <div className="relative z-20 w-full max-w-7xl mx-auto px-4 md:px-8 pt-32">
+        {/* Content Wrapper - With Bottom Padding for Button Clearance */}
+        <div className="relative z-20 w-full max-w-7xl mx-auto px-4 md:px-8 pt-20 pb-24">
           <div className="max-w-3xl">
-            {/* Premium Badge - With Icon */}
-            <div className="inline-flex items-center gap-2 px-4 py-2 mb-8 bg-white/10 backdrop-blur-md border border-white/20 rounded-full">
-              <Zap className="w-3 h-3 text-primary animate-pulse" strokeWidth={2.5} />
+            {/* Premium Badge - Crystal Clear White Icon */}
+            <div className="inline-flex items-center gap-2 px-4 py-2 mb-6 bg-white/10 backdrop-blur-md border border-white/20 rounded-full">
+              <Zap className="w-3 h-3 text-white animate-pulse" strokeWidth={2.5} />
               <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white">
                 NAJNAPREDNIJA AUTO-MOTO PLATFORMA
               </span>
             </div>
 
-            {/* Main Headline - With Primary Color Accent */}
-            <h1 className="text-5xl md:text-7xl lg:text-8xl font-black text-white leading-[1.05] tracking-tight mb-6">
+            {/* Main Headline - Balanced Typography */}
+            <h1 className="text-3xl md:text-5xl font-black text-white leading-tight tracking-tight mb-4">
               PRONAĐITE SVOJE
               <br />
               <span className="text-primary">SAVRŠENO VOZILO</span>
             </h1>
 
             {/* Subheadline - Enhanced Visibility with Drop Shadow */}
-            <p className="text-lg md:text-xl text-slate-200 font-medium leading-relaxed mb-12 max-w-2xl drop-shadow-md">
+            <p className="text-base md:text-lg text-slate-200 font-medium leading-relaxed mb-8 max-w-2xl drop-shadow-md">
               Od luksuznih automobila do e-bicikala i nautike. Najveća ponuda vozila, opreme i iskustava na jednom mjestu.
             </p>
 
@@ -68,8 +68,8 @@ export const Hero = () => {
           </div>
         </div>
 
-        {/* Cinematic Gradient Break - Perfect Blend */}
-        <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-background via-background/20 to-transparent z-10" />
+        {/* Subtle Gradient Break - Bottom 15% Only */}
+        <div className="absolute bottom-0 left-0 right-0 h-[15%] bg-gradient-to-t from-background via-transparent to-transparent z-10" />
       </section>
 
       {/* Super Search Modal */}

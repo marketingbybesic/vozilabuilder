@@ -47,7 +47,7 @@ export const Home = () => {
       <Hero />
 
       {/* Section 1: Najnovije u garaži */}
-      <section className="py-16 px-4 max-w-7xl mx-auto">
+      <section className="pt-8 pb-16 px-4 max-w-7xl mx-auto">
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-3">
             <Sparkles className="w-6 h-6 text-primary" />
