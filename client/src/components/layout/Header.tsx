@@ -1,12 +1,15 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { Menu, X, Plus, Sun, Moon, Heart, User } from 'lucide-react';
-import { navigationCategories } from '../../config/navigation';
+import { Link, useLocation } from 'react-router-dom';
+import { Menu, X, Plus, Sun, Moon, Heart, User, ChevronDown } from 'lucide-react';
+import * as NavigationMenu from '@radix-ui/react-navigation-menu';
+import { navigationMenu } from '../../config/taxonomy';
 
 export const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isDark, setIsDark] = useState(false);
   const [favoritesCount, setFavoritesCount] = useState(0);
+  const [openMobileCategory, setOpenMobileCategory] = useState<string | null>(null);
+  const location = useLocation();
 
   useEffect(() => {
     const isDarkMode = document.documentElement.classList.contains('dark');
@@ -43,18 +46,54 @@ export const Header = () => {
             </span>
           </Link>
 
-          {/* 2. Middle Navigation (Desktop Only) */}
-          <nav className="hidden lg:flex flex-1 justify-center items-center gap-2 xl:gap-4 min-w-0 px-2">
-            {navigationCategories.map((category) => {
-              const Icon = category.icon;
-              return (
-                <Link key={category.id} to={`/${category.slug}`} className="flex flex-shrink items-center gap-1.5 text-[10px] xl:text-xs font-bold uppercase tracking-widest text-muted-foreground hover:text-slate-900 dark:hover:text-slate-100 transition-all duration-300 min-w-0 group truncate">
-                  <Icon className="h-4 w-4 group-hover:scale-110 transition-transform duration-300 flex-shrink-0" />
-                  <span className="truncate">{category.label}</span>
-                </Link>
-              );
-            })}
-          </nav>
+          {/* 2. Middle Navigation (Desktop Only) - Radix Mega Menu */}
+          <NavigationMenu.Root className="hidden lg:flex flex-1 justify-center items-center min-w-0 px-2">
+            <NavigationMenu.List className="flex items-center gap-1 xl:gap-2">
+              {navigationMenu.map((category) => {
+                const Icon = category.icon;
+                const isActive = location.pathname.startsWith(`/${category.slug}`);
+                
+                return (
+                  <NavigationMenu.Item key={category.slug} className="relative">
+                    <NavigationMenu.Trigger className={`group flex items-center gap-1.5 px-2 xl:px-3 py-2 text-[10px] xl:text-xs font-bold uppercase tracking-widest rounded-lg transition-all duration-300 ${
+                      isActive 
+                        ? 'text-primary bg-primary/10' 
+                        : 'text-muted-foreground hover:text-slate-900 dark:hover:text-slate-100 hover:bg-accent/50'
+                    }`}>
+                      {Icon && <Icon className="h-4 w-4 group-hover:scale-110 transition-transform duration-300 flex-shrink-0" />}
+                      <span className="truncate">{category.name}</span>
+                      <ChevronDown className="h-3 w-3 transition-transform duration-300 group-data-[state=open]:rotate-180" />
+                    </NavigationMenu.Trigger>
+                    
+                    <NavigationMenu.Content className="absolute top-full left-0 mt-2 w-64 rounded-xl border border-border/40 bg-background/95 backdrop-blur-xl shadow-2xl data-[motion=from-start]:animate-enterFromLeft data-[motion=from-end]:animate-enterFromRight data-[motion=to-start]:animate-exitToLeft data-[motion=to-end]:animate-exitToRight overflow-hidden">
+                      <div className="p-3 space-y-1">
+                        <Link
+                          to={`/${category.slug}`}
+                          className="block px-4 py-2.5 text-sm font-bold text-foreground hover:bg-accent/80 hover:text-primary rounded-lg transition-all duration-200"
+                        >
+                          Sve {category.name}
+                        </Link>
+                        <div className="h-px bg-border/40 my-2" />
+                        {category.sub.map((subcat) => (
+                          <Link
+                            key={subcat}
+                            to={`/${category.slug}/${subcat.toLowerCase().replace(/\s+/g, '-').replace(/\//g, '-')}`}
+                            className="block px-4 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-accent/50 rounded-lg transition-all duration-200"
+                          >
+                            {subcat}
+                          </Link>
+                        ))}
+                      </div>
+                    </NavigationMenu.Content>
+                  </NavigationMenu.Item>
+                );
+              })}
+            </NavigationMenu.List>
+            
+            <div className="absolute top-full left-0 flex justify-center w-full perspective-[2000px]">
+              <NavigationMenu.Viewport className="relative mt-2 h-[var(--radix-navigation-menu-viewport-height)] w-full origin-top-center overflow-hidden rounded-xl border border-border/40 bg-background/95 backdrop-blur-xl shadow-2xl transition-all duration-300 data-[state=open]:animate-scaleIn data-[state=closed]:animate-scaleOut" />
+            </div>
+          </NavigationMenu.Root>
 
           {/* 3. The Right Side Group - Restored Mobile Icons & Tablet Centering */}
           <div className="flex items-center gap-1 sm:gap-2 ml-auto md:ml-0 md:flex-1 md:justify-center lg:flex-none lg:justify-end">
@@ -96,22 +135,52 @@ export const Header = () => {
         </div>
       </div>
 
-      {/* Mobile Menu Dropdown */}
+      {/* Mobile Menu Dropdown - Accordion Style */}
       {mobileMenuOpen && (
-        <div className="lg:hidden absolute top-20 left-0 w-full border-b border-border/40 bg-background/95 backdrop-blur-xl shadow-2xl transition-all duration-500">
+        <div className="lg:hidden absolute top-20 left-0 w-full border-b border-border/40 bg-background/95 backdrop-blur-xl shadow-2xl transition-all duration-500 max-h-[calc(100vh-5rem)] overflow-y-auto">
           <nav className="container mx-auto px-4 py-6 flex flex-col gap-2">
-            {navigationCategories.map((category) => {
+            {navigationMenu.map((category) => {
               const Icon = category.icon;
+              const isOpen = openMobileCategory === category.slug;
+              const isActive = location.pathname.startsWith(`/${category.slug}`);
+              
               return (
-                <Link
-                  key={category.id}
-                  to={`/${category.slug}`}
-                  className="flex items-center gap-3 px-4 py-3 rounded-lg text-foreground hover:bg-accent hover:text-primary transition-all duration-300 group"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  <Icon className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
-                  <span className="font-bold uppercase tracking-widest text-sm">{category.label}</span>
-                </Link>
+                <div key={category.slug} className="rounded-lg overflow-hidden">
+                  <button
+                    onClick={() => setOpenMobileCategory(isOpen ? null : category.slug)}
+                    className={`w-full flex items-center justify-between gap-3 px-4 py-3 rounded-lg transition-all duration-300 group ${
+                      isActive ? 'bg-primary/10 text-primary' : 'text-foreground hover:bg-accent'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      {Icon && <Icon className="h-5 w-5 flex-shrink-0 transition-colors" />}
+                      <span className="font-bold uppercase tracking-widest text-sm">{category.name}</span>
+                    </div>
+                    <ChevronDown className={`h-4 w-4 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
+                  </button>
+                  
+                  {isOpen && (
+                    <div className="mt-1 ml-4 pl-8 pr-4 py-2 space-y-1 border-l-2 border-border/40 animate-slideDown">
+                      <Link
+                        to={`/${category.slug}`}
+                        className="block px-3 py-2 text-sm font-semibold text-foreground hover:text-primary hover:bg-accent/50 rounded-lg transition-all duration-200"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        Sve {category.name}
+                      </Link>
+                      {category.sub.map((subcat) => (
+                        <Link
+                          key={subcat}
+                          to={`/${category.slug}/${subcat.toLowerCase().replace(/\s+/g, '-').replace(/\//g, '-')}`}
+                          className="block px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-accent/50 rounded-lg transition-all duration-200"
+                          onClick={() => setMobileMenuOpen(false)}
+                        >
+                          {subcat}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
               );
             })}
             
