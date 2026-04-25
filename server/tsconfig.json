@@ -4,7 +4,6 @@
     "module": "ESNext",
     "lib": ["ES2020"],
     "moduleResolution": "node",
-    "rootDir": "./src",
     "outDir": "./dist",
     "strict": true,
     "esModuleInterop": true,
@@ -16,6 +15,6 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "db/**/*"],
   "exclude": ["node_modules", "dist"]
 }

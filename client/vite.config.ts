@@ -1,24 +1,23 @@
 import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react-oxc';
+import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
-  
+
   server: {
     host: true,
     port: 5174,
     strictPort: true,
     allowedHosts: true,
     proxy: {
-      '/api': { 
-        target: 'http://localhost:8080', 
-        changeOrigin: true 
-      }
-    }
+      '/api': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+      },
+    },
   },
 
   build: {
-    // Optimize for sub-1s load times
     target: 'esnext',
     minify: 'terser',
     terserOptions: {
@@ -26,51 +25,20 @@ export default defineConfig({
         comments: false,
       },
     } as any,
-    
-    // Enable source maps for production debugging
     sourcemap: false,
-    
-    // Increase chunk size warning limit
     chunkSizeWarningLimit: 1000,
-    
-    // Rollup options for bundle splitting
     rollupOptions: {
       output: {
-        // Manual chunks for vendor splitting
         manualChunks: {
-          // React ecosystem
-          'vendor-react': [
-            'react',
-            'react-dom',
-            'react-router-dom',
-          ],
-          
-          // Animation library
-          'vendor-motion': [
-            'framer-motion',
-          ],
-          
-          // UI components and icons
-          'vendor-ui': [
-            'lucide-react',
-          ],
-          
-          // Supabase
-          'vendor-supabase': [
-            '@supabase/supabase-js',
-          ],
-          
-          // Utilities
-          'vendor-utils': [
-            'clsx',
-            'date-fns',
-          ],
+          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+          'vendor-motion': ['framer-motion'],
+          'vendor-ui': ['lucide-react'],
+          'vendor-supabase': ['@supabase/supabase-js'],
+          'vendor-utils': ['clsx', 'date-fns'],
         } as any,
-        
-        // Optimize chunk names for caching
         chunkFileNames: 'js/[name]-[hash].js',
         entryFileNames: 'js/[name]-[hash].js',
-        assetFileNames: (assetInfo: any) => {
+        assetFileNames: (assetInfo) => {
           const info = assetInfo.name.split('.');
           const ext = info[info.length - 1];
           if (/png|jpe?g|gif|svg/.test(ext)) {
@@ -86,7 +54,6 @@ export default defineConfig({
     },
   },
 
-  // Optimize dependencies
   optimizeDeps: {
     include: [
       'react',
@@ -95,7 +62,8 @@ export default defineConfig({
       'framer-motion',
       'lucide-react',
       '@supabase/supabase-js',
+      'browser-image-compression',
     ],
     exclude: ['@vite/client', '@vite/env'],
   },
-})
+});

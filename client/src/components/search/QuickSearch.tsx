@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { Search } from 'lucide-react';
 import { navigationMenu } from '../../config/taxonomy';
 
@@ -76,32 +77,49 @@ export const QuickSearch = () => {
     }));
   };
 
+  const inputBase =
+    'w-full bg-black border border-white/10 rounded-none px-4 py-3 text-xs text-white placeholder-white/20 focus:outline-none focus:border-white/30 transition-all duration-300';
+
   return (
-    <div className="w-full bg-black border-b border-white/10">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, ease: [0.25, 1, 0.5, 1] }}
+      className="w-full bg-black border-b border-white/10"
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-8 py-8 sm:py-12">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-2xl sm:text-3xl font-black text-white mb-2">
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.1, ease: [0.25, 1, 0.5, 1] }}
+          className="mb-8"
+        >
+          <h1 className="text-2xl sm:text-3xl font-light tracking-widest text-white mb-2">
             Pronađi vozilo
           </h1>
-          <p className="text-xs sm:text-sm font-black uppercase tracking-widest text-neutral-400">
+          <p className="text-xs sm:text-sm font-light uppercase tracking-widest text-white/40">
             Pretraži našu bazu od 10,000+ vozila
           </p>
-        </div>
+        </motion.div>
 
         {/* Search Form - Porsche Design */}
         <form onSubmit={handleSearch} className="space-y-4">
           {/* Row 1: Category, Brand, Model */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {/* Category Dropdown */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2, ease: [0.25, 1, 0.5, 1] }}
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
+          >
             <div>
-              <label className="block text-xs font-black uppercase tracking-widest text-white/60 mb-2">
+              <label className="block text-xs font-light uppercase tracking-widest text-white/40 mb-2">
                 Kategorija
               </label>
               <select
                 value={filters.categorySlug}
                 onChange={(e) => handleInputChange('categorySlug', e.target.value)}
-                className="w-full bg-black border border-white/10 rounded-none px-4 py-3 text-xs text-white focus:outline-none focus:border-white/30 transition-all"
+                className={inputBase}
               >
                 {navigationMenu.map((category) => (
                   <option key={category.slug} value={category.slug}>
@@ -111,15 +129,14 @@ export const QuickSearch = () => {
               </select>
             </div>
 
-            {/* Brand Dropdown */}
             <div>
-              <label className="block text-xs font-black uppercase tracking-widest text-white/60 mb-2">
+              <label className="block text-xs font-light uppercase tracking-widest text-white/40 mb-2">
                 Marka
               </label>
               <select
                 value={filters.brand}
                 onChange={(e) => handleInputChange('brand', e.target.value)}
-                className="w-full bg-black border border-white/10 rounded-none px-4 py-3 text-xs text-white focus:outline-none focus:border-white/30 transition-all"
+                className={inputBase}
               >
                 <option value="">Sve marke</option>
                 {brands.map((brand) => (
@@ -130,16 +147,15 @@ export const QuickSearch = () => {
               </select>
             </div>
 
-            {/* Model Dropdown */}
             <div>
-              <label className="block text-xs font-black uppercase tracking-widest text-white/60 mb-2">
+              <label className="block text-xs font-light uppercase tracking-widest text-white/40 mb-2">
                 Model
               </label>
               <select
                 value={filters.model}
                 onChange={(e) => handleInputChange('model', e.target.value)}
                 disabled={!filters.brand}
-                className="w-full bg-black border border-white/10 rounded-none px-4 py-3 text-xs text-white focus:outline-none focus:border-white/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                className={`${inputBase} disabled:opacity-30 disabled:cursor-not-allowed`}
               >
                 <option value="">Svi modeli</option>
                 {models.map((model) => (
@@ -150,22 +166,28 @@ export const QuickSearch = () => {
               </select>
             </div>
 
-            {/* Search Button - Spans on mobile, single column on desktop */}
             <div className="flex items-end">
-              <button
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
                 type="submit"
-                className="w-full bg-white text-black rounded-none px-6 py-3 font-black uppercase tracking-widest text-xs hover:bg-neutral-200 transition-all duration-300 flex items-center justify-center gap-2"
+                className="w-full bg-white text-black rounded-none px-6 py-3 font-light uppercase tracking-widest text-xs hover:bg-neutral-200 transition-colors duration-300 flex items-center justify-center gap-2"
               >
-                <Search className="w-4 h-4" strokeWidth={2} />
+                <Search className="w-4 h-4" strokeWidth={1.5} />
                 Pretraži
-              </button>
+              </motion.button>
             </div>
-          </div>
+          </motion.div>
 
           {/* Row 2: Price Range */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.3, ease: [0.25, 1, 0.5, 1] }}
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
+          >
             <div>
-              <label className="block text-xs font-black uppercase tracking-widest text-white/60 mb-2">
+              <label className="block text-xs font-light uppercase tracking-widest text-white/40 mb-2">
                 Cijena od (€)
               </label>
               <input
@@ -173,12 +195,12 @@ export const QuickSearch = () => {
                 value={filters.priceMin}
                 onChange={(e) => handleInputChange('priceMin', e.target.value)}
                 placeholder="0"
-                className="w-full bg-black border border-white/10 rounded-none px-4 py-3 text-xs text-white placeholder-white/20 focus:outline-none focus:border-white/30 transition-all"
+                className={inputBase}
               />
             </div>
 
             <div>
-              <label className="block text-xs font-black uppercase tracking-widest text-white/60 mb-2">
+              <label className="block text-xs font-light uppercase tracking-widest text-white/40 mb-2">
                 Cijena do (€)
               </label>
               <input
@@ -186,12 +208,12 @@ export const QuickSearch = () => {
                 value={filters.priceMax}
                 onChange={(e) => handleInputChange('priceMax', e.target.value)}
                 placeholder="999999"
-                className="w-full bg-black border border-white/10 rounded-none px-4 py-3 text-xs text-white placeholder-white/20 focus:outline-none focus:border-white/30 transition-all"
+                className={inputBase}
               />
             </div>
 
             <div>
-              <label className="block text-xs font-black uppercase tracking-widest text-white/60 mb-2">
+              <label className="block text-xs font-light uppercase tracking-widest text-white/40 mb-2">
                 Godište od
               </label>
               <input
@@ -199,12 +221,12 @@ export const QuickSearch = () => {
                 value={filters.yearMin}
                 onChange={(e) => handleInputChange('yearMin', e.target.value)}
                 placeholder="2000"
-                className="w-full bg-black border border-white/10 rounded-none px-4 py-3 text-xs text-white placeholder-white/20 focus:outline-none focus:border-white/30 transition-all"
+                className={inputBase}
               />
             </div>
 
             <div>
-              <label className="block text-xs font-black uppercase tracking-widest text-white/60 mb-2">
+              <label className="block text-xs font-light uppercase tracking-widest text-white/40 mb-2">
                 Godište do
               </label>
               <input
@@ -212,15 +234,20 @@ export const QuickSearch = () => {
                 value={filters.yearMax}
                 onChange={(e) => handleInputChange('yearMax', e.target.value)}
                 placeholder={new Date().getFullYear().toString()}
-                className="w-full bg-black border border-white/10 rounded-none px-4 py-3 text-xs text-white placeholder-white/20 focus:outline-none focus:border-white/30 transition-all"
+                className={inputBase}
               />
             </div>
-          </div>
+          </motion.div>
 
           {/* Row 3: Mileage */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.4, ease: [0.25, 1, 0.5, 1] }}
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
+          >
             <div>
-              <label className="block text-xs font-black uppercase tracking-widest text-white/60 mb-2">
+              <label className="block text-xs font-light uppercase tracking-widest text-white/40 mb-2">
                 Kilometraža do
               </label>
               <input
@@ -228,32 +255,37 @@ export const QuickSearch = () => {
                 value={filters.mileageMax}
                 onChange={(e) => handleInputChange('mileageMax', e.target.value)}
                 placeholder="999999"
-                className="w-full bg-black border border-white/10 rounded-none px-4 py-3 text-xs text-white placeholder-white/20 focus:outline-none focus:border-white/30 transition-all"
+                className={inputBase}
               />
             </div>
-          </div>
+          </motion.div>
         </form>
 
         {/* Quick Stats */}
-        <div className="mt-8 pt-8 border-t border-white/10 grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.6, delay: 0.5 }}
+          className="mt-8 pt-8 border-t border-white/10 grid grid-cols-2 sm:grid-cols-4 gap-4 text-center"
+        >
           <div>
-            <p className="text-2xl font-black text-white">10,000+</p>
-            <p className="text-xs text-neutral-400 uppercase tracking-widest">Vozila</p>
+            <p className="text-2xl font-light text-white">10,000+</p>
+            <p className="text-xs font-light text-white/40 uppercase tracking-widest">Vozila</p>
           </div>
           <div>
-            <p className="text-2xl font-black text-white">500+</p>
-            <p className="text-xs text-neutral-400 uppercase tracking-widest">Prodavača</p>
+            <p className="text-2xl font-light text-white">500+</p>
+            <p className="text-xs font-light text-white/40 uppercase tracking-widest">Prodavača</p>
           </div>
           <div>
-            <p className="text-2xl font-black text-white">24/7</p>
-            <p className="text-xs text-neutral-400 uppercase tracking-widest">Dostupno</p>
+            <p className="text-2xl font-light text-white">24/7</p>
+            <p className="text-xs font-light text-white/40 uppercase tracking-widest">Dostupno</p>
           </div>
           <div>
-            <p className="text-2xl font-black text-white">100%</p>
-            <p className="text-xs text-neutral-400 uppercase tracking-widest">Sigurno</p>
+            <p className="text-2xl font-light text-white">100%</p>
+            <p className="text-xs font-light text-white/40 uppercase tracking-widest">Sigurno</p>
           </div>
-        </div>
+        </motion.div>
       </div>
-    </div>
+    </motion.div>
   );
 };
