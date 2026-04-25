@@ -31,11 +31,11 @@ export const SEOHead = ({
     listing.description?.substring(0, 160) ||
     `${brand} ${model} - ${listing.price.toLocaleString()} €. ${listing.location || 'Hrvatska'}`;
 
-  // Get primary image
+  // Get primary image - fallback to Vozila.hr logo if no images
   const ogImage =
     imageUrl ||
     listing.listing_images?.[0]?.url ||
-    `${baseUrl}/og-default.jpg`;
+    `${baseUrl}/vozilahrlogo-light.svg`;
 
   // Build canonical URL
   const canonicalUrl = `${baseUrl}/listing/${listing.id}`;
@@ -43,8 +43,8 @@ export const SEOHead = ({
   // Build OpenGraph URL
   const ogUrl = canonicalUrl;
 
-  // Determine if listing is archived
-  const isArchived = listing.status === 'inactive';
+  // Determine if listing is archived/sold
+  const isArchived = listing.status === 'sold';
 
   // Generate keywords
   const keywords = [

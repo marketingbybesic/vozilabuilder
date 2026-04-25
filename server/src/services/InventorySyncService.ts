@@ -2,7 +2,7 @@ import { parse } from 'csv-parse/sync';
 import { z } from 'zod';
 import sharp from 'sharp';
 import { createClient } from '@supabase/supabase-js';
-import { transaction } from '../../db/index.js';
+import { query, transaction } from '../../db/index.js';
 
 // ---------------------------------------------------------------------------
 // Supabase Service Client (requires SERVICE_ROLE_KEY for bucket writes)
@@ -173,12 +173,25 @@ export function parseCsvBuffer(csvBuffer: Buffer): ParsedCsvRow[] {
 }
 
 // ---------------------------------------------------------------------------
-// Core Sync Logic
+// URL Guardrail: basic sanitization + protocol check
+// ---------------------------------------------------------------------------
+function isValidImageUrl(url: string): boolean {
+  if (!url || typeof url !== 'string') return false;
+  const trimmed = url.trim();
+  if (trimmed.length < 10) return false;
+  if (!/^https?:\/\//i.test(trimmed)) return false;
+  // Reject data-URIs, localhost, and private ranges
+  if (trimmed.startsWith('data:')) return false;
+  if (/https?:\/\/(localhost|127\.0\.0\.1|10\.\d+\.\d+\.\d+|192\.168\.\d+\.\d+)/i.test(trimmed)) return false;
+  return true;
+}
+
+// ---------------------------------------------------------------------------
+// Core Sync Logic (Phase 1: immediate text insert)
 // ---------------------------------------------------------------------------
 export interface SyncResult {
   created: number;
-  imagesProcessed: number;
-  imagesFailed: number;
+  imagesQueued: number;
   errors: string[];
 }
 
@@ -188,34 +201,32 @@ export async function syncInventoryFromCsv(
   categoryId: string
 ): Promise<SyncResult> {
   const rows = parseCsvBuffer(csvBuffer);
-  const result: SyncResult = { created: 0, imagesProcessed: 0, imagesFailed: 0, errors: [] };
+  const result: SyncResult = { created: 0, imagesQueued: 0, errors: [] };
+  const queuedImages: { listingId: string; urls: string[]; userId: string }[] = [];
 
   for (const row of rows) {
     try {
       await transaction(async (client) => {
-        // Build dynamic attributes (JSONB) from everything not in top-level columns
         const topLevelCols = new Set([
           'title', 'make', 'model', 'price', 'year', 'mileage',
           'fuel_type', 'transmission', 'condition', 'location_city', 'description',
         ]);
 
-        const attributes: Record<string, any> = {};
+        const attributes: Record<string, unknown> = {};
         for (const [key, value] of Object.entries(row)) {
           if (value !== undefined && value !== null && value !== '' && !topLevelCols.has(key) && key !== 'image_urls') {
             attributes[key] = value;
           }
         }
 
-        // Derive title if missing
         const title = row.title || `${row.make} ${row.model} ${row.year || ''}`.trim();
 
-        // Insert listing
         const insertQuery = `
           INSERT INTO listings (
             user_id, category_id, title, description, price,
             make, model, year, mileage, fuel_type, transmission,
-            condition, location_city, attributes, status
-          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+            condition, location_city, attributes, status, sync_status
+          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
           RETURNING id
         `;
         const insertValues = [
@@ -234,41 +245,80 @@ export async function syncInventoryFromCsv(
           row.location_city || null,
           JSON.stringify(attributes),
           'active',
+          'processing_images',
         ];
 
         const insertRes = await client.query(insertQuery, insertValues);
-        const listingId = insertRes.rows[0].id;
+        const listingId: string = insertRes.rows[0].id;
         result.created++;
 
-        // Process images if present
-        const imageUrls: string | undefined = row.image_urls;
+        const imageUrls = row.image_urls;
         if (imageUrls) {
           const urls = imageUrls
             .split(/[,;]/)
             .map((u: string) => u.trim())
-            .filter((u: string) => u.length > 0 && u.startsWith('http'));
+            .filter(isValidImageUrl);
 
-          for (let i = 0; i < urls.length; i++) {
-            const imgResult = await fetchAndStoreImage(urls[i], listingId, i, userId);
-            if (imgResult) {
-              await client.query(
-                `INSERT INTO listing_images (listing_id, url, storage_path, sort_order, is_primary)
-                 VALUES ($1, $2, $3, $4, $5)`,
-                [listingId, imgResult.url, imgResult.storagePath, i, i === 0]
-              );
-              result.imagesProcessed++;
-            } else {
-              result.imagesFailed++;
-            }
+          if (urls.length > 0) {
+            queuedImages.push({ listingId, urls, userId });
+            result.imagesQueued += urls.length;
           }
         }
       });
-    } catch (err: any) {
-      const msg = `Row (${row.make} ${row.model}) failed: ${err.message}`;
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      const msg = `Row (${row.make} ${row.model}) failed: ${message}`;
       console.error('❌', msg);
       result.errors.push(msg);
     }
   }
 
+  // Phase 2: offload image processing to background (fire-and-forget)
+  if (queuedImages.length > 0) {
+    processImagesAsync(queuedImages).catch((err) => {
+      console.error('❌ Background image processing failed:', err);
+    });
+  }
+
   return result;
+}
+
+// ---------------------------------------------------------------------------
+// Phase 2: Async image scraping (runs after HTTP response sent)
+// ---------------------------------------------------------------------------
+async function processImagesAsync(
+  items: { listingId: string; urls: string[]; userId: string }[]
+): Promise<void> {
+  let processed = 0;
+  let failed = 0;
+
+  for (const item of items) {
+    for (let i = 0; i < item.urls.length; i++) {
+      try {
+        const imgResult = await fetchAndStoreImage(item.urls[i], item.listingId, i, item.userId);
+        if (imgResult) {
+          await query(
+            `INSERT INTO listing_images (listing_id, url, storage_path, sort_order, is_primary)
+             VALUES ($1, $2, $3, $4, $5)`,
+            [item.listingId, imgResult.url, imgResult.storagePath, i, i === 0]
+          );
+          processed++;
+        } else {
+          failed++;
+        }
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        console.warn(`⚠️  Image ${i} failed for listing ${item.listingId}:`, message);
+        failed++;
+      }
+    }
+
+    // Mark listing as completed once all its images are attempted
+    await query(
+      `UPDATE listings SET sync_status = 'completed' WHERE id = $1`,
+      [item.listingId]
+    );
+  }
+
+  console.log(`🖼️  Background image processing done: ${processed} processed, ${failed} failed`);
 }

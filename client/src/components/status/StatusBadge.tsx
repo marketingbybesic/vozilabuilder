@@ -9,14 +9,14 @@ interface StatusBadgeProps {
 }
 
 const statusConfig: Record<ListingStatus, { label: string; color: string; bgColor: string; icon: React.ReactNode; pulse: boolean }> = {
-  published: {
+  active: {
     label: 'Live',
     color: 'text-green-400',
     bgColor: 'bg-green-500/10',
     icon: <CheckCircle2 className="w-4 h-4" strokeWidth={2} />,
     pulse: true,
   },
-  inactive: {
+  sold: {
     label: 'Sold',
     color: 'text-red-400',
     bgColor: 'bg-red-500/10',

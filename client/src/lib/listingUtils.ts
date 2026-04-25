@@ -10,12 +10,10 @@ export const getPriceLabel = (listingType: ListingType): string => {
 /**
  * Format price with appropriate label
  */
-export const formatPrice = (price: number, listingType: ListingType, currency: string = '€'): string => {
+export const formatPrice = (price: number, _listingType: ListingType, currency: string = '€'): string => {
   if (price === 0) return 'Na upit';
   
   const formattedPrice = price.toLocaleString('hr-HR');
-  const label = getPriceLabel(listingType);
-  
   return `${formattedPrice} ${currency}`;
 };
 

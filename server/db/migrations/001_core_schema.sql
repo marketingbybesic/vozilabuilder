@@ -81,6 +81,7 @@ CREATE TABLE listings (
     views_count INT NOT NULL DEFAULT 0,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    sync_status VARCHAR(20) DEFAULT 'completed',
     published_at TIMESTAMP WITH TIME ZONE,
     expires_at TIMESTAMP WITH TIME ZONE
 );

@@ -16,7 +16,7 @@ export const ListingCard = ({ listing, isLoading = false }: ListingCardProps) =>
   const hasMultipleImages = sortedImages.length > 1;
   const primaryImage = sortedImages[0]?.url;
   const secondaryImage = sortedImages[1]?.url;
-  const showHotBadge = listing.views_count > 20;
+  const showHotBadge = (listing.views_count ?? 0) > 20;
 
   // Skeleton Loader
   if (isLoading) {

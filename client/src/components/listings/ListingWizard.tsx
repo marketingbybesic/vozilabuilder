@@ -15,14 +15,14 @@ export const ListingWizard = () => {
     setValue,
     watch,
     formState: { errors },
-  } = useForm<ListingFormData>({
+  } = useForm({
     resolver: zodResolver(listingSchema),
     defaultValues: {
       title: '',
       price: 0,
       currency: '€',
       categoryId: '',
-      status: 'draft' as const,
+      status: 'draft' as 'draft',
       attributes: {},
     },
   });

@@ -11,7 +11,7 @@ export interface Category {
   slug: string;
 }
 
-export type ListingStatus = 'published' | 'inactive' | 'draft';
+export type ListingStatus = 'draft' | 'active' | 'sold';
 export type ListingType = 'prodaja' | 'najam';
 
 export interface Listing {

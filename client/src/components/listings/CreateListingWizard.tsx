@@ -120,7 +120,7 @@ export const CreateListingWizard = () => {
           user.id,
           listing.id,
           'hero',
-          (progress) => {
+          (_progress) => {
             // Update progress: hero is 33%
           }
         );
@@ -134,7 +134,7 @@ export const CreateListingWizard = () => {
           user.id,
           listing.id,
           'gallery',
-          (progress) => {
+          (_progress) => {
             // Update progress: gallery is 33%
           }
         );
@@ -147,7 +147,7 @@ export const CreateListingWizard = () => {
           user.id,
           listing.id,
           'damage',
-          (progress) => {
+          (_progress) => {
             // Update progress: damage is 34%
           }
         );
@@ -427,8 +427,8 @@ const Step2 = ({ formData, setFormData, filters }: any) => {
 
 // Step 3: Triple-Zone Media Upload
 const Step3 = ({ formData, handleFileChange }: any) => {
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress] = useState(0);
+  const [isUploading] = useState(false);
 
   const removeImage = (type: 'hero' | 'gallery' | 'damage', index?: number) => {
     if (type === 'hero') {

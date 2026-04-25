@@ -96,8 +96,8 @@ export const ListingDetail = () => {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center px-4">
         <div className="text-center">
-          <h1 className="text-4xl font-black text-foreground mb-4">Oglas nije pronađen</h1>
-          <Link to="/" className="text-primary font-bold hover:underline">← Natrag na početnu</Link>
+          <h1 className="text-4xl font-light tracking-widest text-foreground mb-4">Oglas nije pronađen</h1>
+          <Link to="/" className="text-primary font-light tracking-widest uppercase text-xs hover:underline">← Natrag na početnu</Link>
         </div>
       </div>
     );
@@ -144,19 +144,19 @@ export const ListingDetail = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Status Badge for Inactive Listings */}
-      {listing.status === 'inactive' && (
-        <div className="bg-red-500 text-white py-3 px-4 text-center">
+      {listing.status === 'sold' && (
+        <div className="bg-red-500/90 text-white py-3 px-4 text-center">
           <div className="max-w-7xl mx-auto flex items-center justify-center gap-2">
-            <AlertCircle className="w-5 h-5" />
-            <span className="font-black uppercase tracking-widest text-sm">SOLD / ARCHIVED</span>
+            <AlertCircle className="w-5 h-5" strokeWidth={1.5} />
+            <span className="font-light uppercase tracking-widest text-sm">PRODANO / ARHIVIRANO</span>
           </div>
         </div>
       )}
 
       <div className="max-w-7xl mx-auto px-8 py-8">
         {/* Breadcrumb */}
-        <Link to="/" className="inline-flex items-center gap-2 text-sm font-black uppercase tracking-widest text-neutral-400 hover:text-white transition-colors mb-8">
-          <ArrowLeft className="w-4 h-4" />
+        <Link to="/" className="inline-flex items-center gap-2 text-sm font-light uppercase tracking-widest text-white/40 hover:text-white transition-colors mb-8">
+          <ArrowLeft className="w-4 h-4" strokeWidth={1.5} />
           Natrag
         </Link>
 
@@ -172,12 +172,12 @@ export const ListingDetail = () => {
                 className="w-full h-full object-cover"
               />
 
-              {/* SOLD Watermark for Inactive Listings */}
-              {listing.status === 'inactive' && (
-                <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+              {/* PRODANO Watermark for Inactive Listings */}
+              {listing.status === 'sold' && (
+                <div className="absolute inset-0 bg-black/40 flex items-center justify-center pointer-events-none">
                   <div className="text-center">
-                    <div className="text-8xl font-black text-white/30 transform -rotate-45 mb-4">SOLD</div>
-                    <p className="text-sm font-black uppercase tracking-widest text-white/40">Oglas je arhiviran</p>
+                    <div className="text-8xl font-light text-white/30 transform -rotate-45 mb-4 tracking-widest">PRODANO</div>
+                    <p className="text-sm font-light uppercase tracking-widest text-white/40">Oglas je arhiviran</p>
                   </div>
                 </div>
               )}
@@ -201,7 +201,7 @@ export const ListingDetail = () => {
               )}
 
               {/* Image Counter */}
-              <div className="absolute bottom-0 right-0 px-4 py-2 bg-black/80 backdrop-blur-sm rounded-none text-white text-xs font-black uppercase tracking-widest">
+              <div className="absolute bottom-0 right-0 px-4 py-2 bg-black/80 backdrop-blur-sm rounded-none text-white text-xs font-light uppercase tracking-widest">
                 {currentImageIndex + 1} / {sortedImages.length || 1}
               </div>
             </div>
@@ -227,25 +227,25 @@ export const ListingDetail = () => {
 
             {/* Description */}
             <div className="bg-card border border-neutral-800 rounded-none p-8">
-              <h2 className="text-xs font-black uppercase tracking-widest text-neutral-400 mb-4">Opis</h2>
-              <p className="text-white leading-relaxed">
+              <h2 className="text-xs font-light uppercase tracking-widest text-white/40 mb-4">Opis</h2>
+              <p className="text-white/80 leading-relaxed font-light">
                 {listing.description || 'Nema dostupnog opisa.'}
               </p>
             </div>
 
             {/* Dynamic Specs - Porsche Grid */}
             <div className="bg-card border border-neutral-800 rounded-none p-8">
-              <h2 className="text-xs font-black uppercase tracking-widest text-neutral-400 mb-8">Specifikacije</h2>
+              <h2 className="text-xs font-light uppercase tracking-widest text-white/40 mb-8">Specifikacije</h2>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
                 {specs.map((spec, idx) => {
                   const Icon = spec.icon;
                   return (
                     <div key={idx} className="space-y-2">
-                      <Icon className="w-5 h-5 text-neutral-400 mb-3" strokeWidth={1.5} />
-                      <p className="text-[10px] font-black uppercase tracking-widest text-neutral-400">
+                      <Icon className="w-5 h-5 text-white/40 mb-3" strokeWidth={1.5} />
+                      <p className="text-[10px] font-light uppercase tracking-widest text-white/40">
                         {spec.label}
                       </p>
-                      <p className="text-lg font-black text-white">{spec.value}</p>
+                      <p className="text-lg font-light text-white">{spec.value}</p>
                     </div>
                   );
                 })}
@@ -258,40 +258,40 @@ export const ListingDetail = () => {
             <div className="sticky top-24 space-y-8">
               {/* Price Card */}
               <div className="bg-card border border-neutral-800 rounded-none p-8">
-                <h1 className="text-2xl font-black text-white mb-8 leading-tight">
+                <h1 className="text-2xl font-light text-white mb-8 leading-tight tracking-widest">
                   {listing.title}
                 </h1>
                 
                 <div className="mb-8">
-                  <p className="text-xs font-black uppercase tracking-widest text-neutral-400 mb-2">Cijena</p>
-                  <p className="text-4xl font-black text-white">
+                  <p className="text-xs font-light uppercase tracking-widest text-white/40 mb-2">Cijena</p>
+                  <p className="text-4xl font-light text-white">
                     {listing.price === 0 ? 'Na upit' : `${listing.price.toLocaleString()} ${listing.currency || '€'}`}
                   </p>
                 </div>
 
                 {/* Price Ribbon */}
                 <div className={`flex items-center gap-2 px-4 py-2 ${priceRibbon.color} text-white rounded-none mb-8`}>
-                  <RibbonIcon className="w-4 h-4" strokeWidth={2} />
-                  <span className="text-xs font-black uppercase tracking-widest">{priceRibbon.text}</span>
+                  <RibbonIcon className="w-4 h-4" strokeWidth={1.5} />
+                  <span className="text-xs font-light uppercase tracking-widest">{priceRibbon.text}</span>
                 </div>
 
                 {/* Location */}
                 {listing.location && (
-                  <div className="flex items-center gap-2 text-neutral-400 mb-8">
+                  <div className="flex items-center gap-2 text-white/40 mb-8">
                     <MapPin className="w-4 h-4" strokeWidth={1.5} />
-                    <span className="text-xs font-black uppercase tracking-widest">{listing.location}</span>
+                    <span className="text-xs font-light uppercase tracking-widest">{listing.location}</span>
                   </div>
                 )}
 
-                {/* Contact Buttons - Sharp Design */}
-                {listing.status === 'inactive' ? (
+                {/* Contact Buttons - Sharp Design (Desktop) */}
+                {listing.status === 'sold' ? (
                   <div className="p-4 border border-red-500/30 bg-red-500/5 rounded-none text-center">
-                    <p className="text-xs font-black uppercase tracking-widest text-red-400">
+                    <p className="text-xs font-light uppercase tracking-widest text-red-400">
                       Oglas je arhiviran - kontakt nije dostupan
                     </p>
                   </div>
                 ) : (
-                  <div className="space-y-2">
+                  <div className="hidden lg:flex flex-col space-y-2">
                     {whatsappLink && (
                       <a 
                         href={whatsappLink}
@@ -309,9 +309,9 @@ export const ListingDetail = () => {
                             // Analytics not initialized yet, silently fail
                           }
                         }}
-                        className="flex items-center justify-center gap-3 w-full px-8 py-4 bg-green-600 text-white rounded-none font-black uppercase tracking-widest text-xs hover:bg-green-700 transition-all duration-300"
+                        className="flex items-center justify-center gap-3 w-full px-8 py-4 bg-green-600 text-white rounded-none font-light uppercase tracking-widest text-xs hover:bg-green-700 transition-all duration-300"
                       >
-                        <MessageCircle className="w-5 h-5" strokeWidth={2} />
+                        <MessageCircle className="w-5 h-5" strokeWidth={1.5} />
                         WhatsApp
                       </a>
                     )}
@@ -319,9 +319,9 @@ export const ListingDetail = () => {
                     {listing.contact_phone && (
                       <a 
                         href={`tel:${listing.contact_phone}`}
-                        className="flex items-center justify-center gap-3 w-full px-8 py-4 bg-white text-black rounded-none font-black uppercase tracking-widest text-xs hover:bg-neutral-200 transition-all duration-300"
+                        className="flex items-center justify-center gap-3 w-full px-8 py-4 bg-white text-black rounded-none font-light uppercase tracking-widest text-xs hover:bg-neutral-200 transition-all duration-300"
                       >
-                        <Phone className="w-5 h-5" strokeWidth={2} />
+                        <Phone className="w-5 h-5" strokeWidth={1.5} />
                         Nazovi
                       </a>
                     )}
@@ -329,9 +329,9 @@ export const ListingDetail = () => {
                     {listing.contact_email && (
                       <a 
                         href={`mailto:${listing.contact_email}`}
-                        className="flex items-center justify-center gap-3 w-full px-8 py-4 bg-neutral-800 text-white rounded-none font-black uppercase tracking-widest text-xs hover:bg-neutral-700 transition-all duration-300"
+                        className="flex items-center justify-center gap-3 w-full px-8 py-4 bg-neutral-800 text-white rounded-none font-light uppercase tracking-widest text-xs hover:bg-neutral-700 transition-all duration-300"
                       >
-                        <Mail className="w-5 h-5" strokeWidth={2} />
+                        <Mail className="w-5 h-5" strokeWidth={1.5} />
                         Email
                       </a>
                     )}
@@ -342,12 +342,12 @@ export const ListingDetail = () => {
               {/* Seller Info */}
               <div className="bg-card border border-neutral-800 rounded-none p-8">
                 <div className="flex items-center gap-3 mb-4">
-                  <User className="w-5 h-5 text-neutral-400" strokeWidth={1.5} />
-                  <h3 className="text-xs font-black uppercase tracking-widest text-neutral-400">
+                  <User className="w-5 h-5 text-white/40" strokeWidth={1.5} />
+                  <h3 className="text-xs font-light uppercase tracking-widest text-white/40">
                     Prodavač
                   </h3>
                 </div>
-                <p className="text-sm text-white">
+                <p className="text-sm text-white/80 font-light">
                   Privatni prodavač
                 </p>
               </div>
@@ -355,6 +355,54 @@ export const ListingDetail = () => {
           </div>
         </div>
       </div>
+
+      {/* Mobile Sticky Contact Bar */}
+      {listing.status === 'active' && (
+        <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-black border-t border-white/10 px-4 py-3 z-50 flex items-center justify-between gap-3">
+          <div className="flex-1 min-w-0">
+            <p className="text-[10px] font-light uppercase tracking-widest text-white/40 truncate">
+              {listing.title}
+            </p>
+            <p className="text-sm font-light text-white truncate">
+              {listing.price === 0 ? 'Na upit' : `${listing.price.toLocaleString()} ${listing.currency || '€'}`}
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            {whatsappLink && (
+              <a
+                href={whatsappLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => {
+                  try {
+                    const analytics = getAnalytics();
+                    analytics.trackWhatsAppClick(listing.id, {
+                      title: listing.title,
+                      price: listing.price,
+                      category: listing.categories?.slug,
+                    });
+                  } catch {
+                    // Analytics not initialized yet, silently fail
+                  }
+                }}
+                className="flex items-center justify-center gap-2 px-4 py-3 bg-green-600 text-white font-light uppercase tracking-widest text-[10px] hover:bg-green-700 transition-colors"
+              >
+                <MessageCircle className="w-4 h-4" strokeWidth={1.5} />
+                <span className="hidden sm:inline">WhatsApp</span>
+              </a>
+            )}
+            {listing.contact_phone && (
+              <a
+                href={`tel:${listing.contact_phone}`}
+                className="flex items-center justify-center gap-2 px-4 py-3 bg-white text-black font-light uppercase tracking-widest text-[10px] hover:bg-neutral-200 transition-colors"
+              >
+                <Phone className="w-4 h-4" strokeWidth={1.5} />
+                <span className="hidden sm:inline">Nazovi</span>
+              </a>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

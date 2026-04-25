@@ -34,8 +34,7 @@ export const listingSchema = z.object({
     .min(1, 'Kategorija je obavezna'),
 
   // Dynamic attributes (JSONB in DB)
-  // Will be strictly typed per category in next phase
-  attributes: z.record(z.string(), z.any()).default({}),
+  attributes: z.record(z.string(), z.any()).optional().default({}),
 
   // Location fields
   location: z
@@ -59,9 +58,9 @@ export const listingSchema = z.object({
     .email('Neispravna email adresa')
     .optional(),
 
-  // Status (will be set to 'draft' initially)
+  // Status matches DB enum: draft | active | sold
   status: z
-    .enum(['draft', 'active', 'sold', 'archived'])
+    .enum(['draft', 'active', 'sold'])
     .default('draft'),
 });
 

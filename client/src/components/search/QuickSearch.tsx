@@ -171,7 +171,7 @@ export const QuickSearch = () => {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 type="submit"
-                className="w-full bg-white text-black rounded-none px-6 py-3 font-light uppercase tracking-widest text-xs hover:bg-neutral-200 transition-colors duration-300 flex items-center justify-center gap-2"
+                className="w-full bg-white text-black rounded-none px-6 py-3 font-light uppercase tracking-[0.2em] text-xs hover:bg-neutral-200 transition-colors duration-300 flex items-center justify-center gap-2"
               >
                 <Search className="w-4 h-4" strokeWidth={1.5} />
                 Pretraži

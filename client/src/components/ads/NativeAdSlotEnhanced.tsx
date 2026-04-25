@@ -347,8 +347,8 @@ export const NativeAdSlot = ({ adId, userRole, isLoggedIn = false }: NativeAdSlo
 export const withAdSlots = <T extends { id: string }>(
   items: T[],
   adIds: string[],
-  userRole?: 'admin' | 'premium' | 'free' | null,
-  isLoggedIn?: boolean
+  _userRole?: 'admin' | 'premium' | 'free' | null,
+  _isLoggedIn?: boolean
 ) => {
   const result: (T | { type: 'ad'; adId: string })[] = [];
   let adIndex = 0;

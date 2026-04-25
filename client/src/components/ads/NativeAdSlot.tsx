@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
-import { Edit2, Save, X, Play } from 'lucide-react';
+import { Edit2, Save, X } from 'lucide-react';
 
 interface NativeAdSlotProps {
   adId: string;

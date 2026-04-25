@@ -1,9 +1,8 @@
-import { UseFormRegister, FieldErrors } from 'react-hook-form';
-import { ListingFormData } from '../../../lib/validations/listingSchema';
+import { UseFormRegister } from 'react-hook-form';
 
 interface CarFormFieldsProps {
-  register: UseFormRegister<ListingFormData>;
-  errors: FieldErrors<ListingFormData>;
+  register: UseFormRegister<any>;
+  errors: any;
 }
 
 export const CarFormFields = ({ register, errors }: CarFormFieldsProps) => {

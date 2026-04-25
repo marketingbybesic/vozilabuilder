@@ -4,7 +4,7 @@ import { supabase } from '../../lib/supabase';
 import { getAnalytics } from '../../lib/analytics';
 import { 
   Calendar, Gauge, Zap, SlidersHorizontal, ChevronDown, ChevronUp, 
-  Search, Box, Clock, ArrowDown10, ArrowUp01, Eye, ChevronLeft, ChevronRight
+  Box, Clock, ArrowDown10, ArrowUp01, Eye, ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { navigationMenu } from '../../config/taxonomy';
 import { globalFilters, categoryFilters, FilterDefinition } from '../../config/filters';
@@ -191,7 +191,7 @@ const ListingCard = ({ car }: { car: Listing }) => {
         
         {/* Badges */}
         <div className="absolute top-4 left-4 flex flex-col gap-2 items-start">
-          {car.featured && (
+          {car.is_featured && (
             <div className="px-3 py-1.5 bg-white/95 dark:bg-black/95 backdrop-blur-md rounded-lg text-[9px] font-black uppercase tracking-widest text-primary shadow-lg">
               Premium
             </div>
@@ -201,7 +201,7 @@ const ListingCard = ({ car }: { car: Listing }) => {
         {/* Psychological Trigger: View Counter Overlay on Hover */}
         <div className={`absolute top-4 right-4 px-3 py-1.5 bg-black/60 backdrop-blur-md rounded-lg text-[9px] font-black uppercase tracking-widest text-white shadow-lg flex items-center gap-1.5 transition-opacity duration-300 ${isHovered ? 'opacity-100' : 'opacity-0'}`}>
           <Eye className="w-3 h-3" />
-          {car.views_count + 124} pregleda
+          {(car.views_count ?? 0) + 124} pregleda
         </div>
       </div>
 

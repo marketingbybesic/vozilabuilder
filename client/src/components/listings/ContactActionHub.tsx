@@ -9,7 +9,6 @@ interface ContactActionHubProps {
   listingUrl: string;
   contactPhone?: string;
   contactEmail?: string;
-  ownerId: string;
 }
 
 export const ContactActionHub = ({
@@ -18,7 +17,6 @@ export const ContactActionHub = ({
   listingUrl,
   contactPhone,
   contactEmail,
-  ownerId,
 }: ContactActionHubProps) => {
   const [showMessageModal, setShowMessageModal] = useState(false);
   const [messageText, setMessageText] = useState('');
