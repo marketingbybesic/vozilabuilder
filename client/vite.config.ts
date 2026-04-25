@@ -21,7 +21,7 @@ export default defineConfig({
     target: 'esnext',
     minify: 'terser',
     terserOptions: {
-      output: {
+      format: {
         comments: false,
       },
     } as any,
@@ -32,7 +32,13 @@ export default defineConfig({
         chunkFileNames: 'js/[name]-[hash].js',
         entryFileNames: 'js/[name]-[hash].js',
         assetFileNames: (assetInfo) => {
-          const info = assetInfo.name.split('.');
+          // 🛡️ SIGURNOSNA PROVJERA: Ako ime ne postoji, spriječi rušenje
+          const fileName = assetInfo.name;
+          if (!fileName) {
+            return `assets/[name]-[hash][extname]`;
+          }
+
+          const info = fileName.split('.');
           const ext = info[info.length - 1];
           if (/png|jpe?g|gif|svg/.test(ext)) {
             return `images/[name]-[hash][extname]`;
