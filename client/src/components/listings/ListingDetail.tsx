@@ -3,18 +3,25 @@ import { useParams, Link } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { getAnalytics } from '../../lib/analytics';
 import { Skeleton } from '../../components/ui/Skeleton';
-import { 
-  Calendar, Gauge, Zap, MapPin, Phone, Mail, User, 
-  ChevronLeft, ChevronRight, TrendingDown, TrendingUp, Minus,
-  MessageCircle, ArrowLeft, AlertCircle
+import {
+  Calendar, Gauge, Zap, MapPin, Phone, Mail, User,
+  TrendingDown, TrendingUp, Minus,
+  MessageCircle, ArrowLeft, AlertCircle, ShieldCheck
 } from 'lucide-react';
 import { Listing } from '../../types';
+import Lightbox from 'yet-another-react-lightbox';
+import Zoom from 'yet-another-react-lightbox/plugins/zoom';
+import Thumbnails from 'yet-another-react-lightbox/plugins/thumbnails';
+import 'yet-another-react-lightbox/styles.css';
+import 'yet-another-react-lightbox/plugins/thumbnails.css';
 
 export const ListingDetail = () => {
   const { id } = useParams();
   const [listing, setListing] = useState<Listing | null>(null);
   const [loading, setLoading] = useState(true);
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
+  const [lightboxSlides, setLightboxSlides] = useState<{ src: string }[]>([]);
 
   useEffect(() => {
     const fetchListing = async () => {
@@ -23,12 +30,16 @@ export const ListingDetail = () => {
       try {
         const { data, error } = await supabase
           .from('listings')
-          .select('*, categories(name, slug), listing_images(id, url, is_primary, sort_order)')
+          .select('*, categories(name, slug), listing_images(id, url, is_primary, sort_order), users!inner(id, dealer_verified, tier, is_verified)')
           .eq('id', id)
           .single();
 
         if (error) throw error;
-        setListing(data as Listing);
+        const normalized = {
+          ...data,
+          owner: (data as any).users || (data as any).owner,
+        };
+        setListing(normalized as Listing);
 
         // Track view_listing event
         try {
@@ -105,7 +116,6 @@ export const ListingDetail = () => {
 
   const images = listing.listing_images || [];
   const sortedImages = images.sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
-  const currentImage = sortedImages[currentImageIndex]?.url || '/placeholder-car.jpg';
 
   // Price analysis (dummy median for demo)
   const dummyMedian = 25000;
@@ -164,65 +174,128 @@ export const ListingDetail = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left: Image Gallery */}
           <div className="lg:col-span-2 space-y-8">
-            {/* Edge-to-Edge Hero Image - 16:9 */}
-            <div className="relative aspect-video bg-neutral-900 rounded-none overflow-hidden">
-              <img 
-                src={currentImage} 
-                alt={listing.title}
-                className="w-full h-full object-cover"
-              />
-
-              {/* PRODANO Watermark for Inactive Listings */}
-              {listing.status === 'sold' && (
-                <div className="absolute inset-0 bg-black/40 flex items-center justify-center pointer-events-none">
-                  <div className="text-center">
-                    <div className="text-8xl font-light text-white/30 transform -rotate-45 mb-4 tracking-widest">PRODANO</div>
-                    <p className="text-sm font-light uppercase tracking-widest text-white/40">Oglas je arhiviran</p>
+            {/* Premium Gallery Layout */}
+            {sortedImages.length === 0 ? (
+              <div className="relative aspect-video bg-neutral-900 rounded-none overflow-hidden">
+                <img
+                  src="/placeholder-car.jpg"
+                  alt={listing.title}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            ) : sortedImages.length === 1 ? (
+              <div className="relative aspect-video bg-neutral-900 rounded-none overflow-hidden cursor-pointer"
+                onClick={() => {
+                  setLightboxSlides(sortedImages.map((img) => ({ src: img.url })));
+                  setLightboxIndex(0);
+                  setLightboxOpen(true);
+                }}
+              >
+                <img
+                  src={sortedImages[0].url}
+                  alt={listing.title}
+                  className="w-full h-full object-cover"
+                />
+                {listing.status === 'sold' && (
+                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center pointer-events-none">
+                    <div className="text-center">
+                      <div className="text-8xl font-light text-white/30 transform -rotate-45 mb-4 tracking-widest">PRODANO</div>
+                      <p className="text-sm font-light uppercase tracking-widest text-white/40">Oglas je arhiviran</p>
+                    </div>
+                  </div>
+                )}
+                <div className="absolute bottom-0 right-0 px-4 py-2 bg-black/80 backdrop-blur-sm rounded-none text-white text-xs font-light uppercase tracking-widest">
+                  1 / 1
+                </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-2 h-[300px] md:h-[500px]">
+                {/* Main Image - Left (spans 2 columns, full height) */}
+                <div
+                  className="md:col-span-2 h-full relative bg-neutral-900 rounded-none overflow-hidden cursor-pointer"
+                  onClick={() => {
+                    setLightboxSlides(sortedImages.map((img) => ({ src: img.url })));
+                    setLightboxIndex(0);
+                    setLightboxOpen(true);
+                  }}
+                >
+                  <img
+                    src={sortedImages[0].url}
+                    alt={listing.title}
+                    className="w-full h-full object-cover"
+                  />
+                  {listing.status === 'sold' && (
+                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center pointer-events-none">
+                      <div className="text-center">
+                        <div className="text-8xl font-light text-white/30 transform -rotate-45 mb-4 tracking-widest">PRODANO</div>
+                        <p className="text-sm font-light uppercase tracking-widest text-white/40">Oglas je arhiviran</p>
+                      </div>
+                    </div>
+                  )}
+                  <div className="absolute bottom-0 right-0 px-4 py-2 bg-black/80 backdrop-blur-sm rounded-none text-white text-xs font-light uppercase tracking-widest">
+                    1 / {sortedImages.length}
                   </div>
                 </div>
-              )}
-              
-              {/* Navigation Arrows - Sharp Design */}
-              {sortedImages.length > 1 && (
-                <>
-                  <button
-                    onClick={() => setCurrentImageIndex((prev) => (prev === 0 ? sortedImages.length - 1 : prev - 1))}
-                    className="absolute left-0 top-1/2 -translate-y-1/2 w-16 h-16 bg-black/80 hover:bg-black backdrop-blur-sm rounded-none flex items-center justify-center transition-all duration-300"
-                  >
-                    <ChevronLeft className="w-8 h-8 text-white" strokeWidth={1.5} />
-                  </button>
-                  <button
-                    onClick={() => setCurrentImageIndex((prev) => (prev === sortedImages.length - 1 ? 0 : prev + 1))}
-                    className="absolute right-0 top-1/2 -translate-y-1/2 w-16 h-16 bg-black/80 hover:bg-black backdrop-blur-sm rounded-none flex items-center justify-center transition-all duration-300"
-                  >
-                    <ChevronRight className="w-8 h-8 text-white" strokeWidth={1.5} />
-                  </button>
-                </>
-              )}
-
-              {/* Image Counter */}
-              <div className="absolute bottom-0 right-0 px-4 py-2 bg-black/80 backdrop-blur-sm rounded-none text-white text-xs font-light uppercase tracking-widest">
-                {currentImageIndex + 1} / {sortedImages.length || 1}
+                {/* Right Column - Stacked Images */}
+                <div className="hidden md:flex flex-col gap-2 h-full">
+                  {sortedImages.slice(1, 3).map((img, idx) => (
+                    <div
+                      key={img.id}
+                      className="flex-1 relative bg-neutral-900 rounded-none overflow-hidden cursor-pointer"
+                      onClick={() => {
+                        setLightboxSlides(sortedImages.map((i) => ({ src: i.url })));
+                        setLightboxIndex(idx + 1);
+                        setLightboxOpen(true);
+                      }}
+                    >
+                      <img
+                        src={img.url}
+                        alt={`Thumbnail ${idx + 2}`}
+                        className="w-full h-full object-cover"
+                      />
+                      {sortedImages.length > 3 && idx === 1 && (
+                        <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                          <span className="text-white font-light uppercase tracking-widest text-sm">
+                            +{sortedImages.length - 3}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                  {sortedImages.length === 2 && <div className="flex-1 bg-neutral-900 rounded-none" />}
+                </div>
+                {/* Mobile: horizontal scroll for extra images */}
+                <div className="flex md:hidden gap-2 overflow-x-auto pb-2">
+                  {sortedImages.slice(1).map((img, idx) => (
+                    <div
+                      key={img.id}
+                      className="flex-shrink-0 w-32 aspect-video bg-neutral-900 rounded-none overflow-hidden cursor-pointer"
+                      onClick={() => {
+                        setLightboxSlides(sortedImages.map((i) => ({ src: i.url })));
+                        setLightboxIndex(idx + 1);
+                        setLightboxOpen(true);
+                      }}
+                    >
+                      <img src={img.url} alt={`Thumbnail ${idx + 2}`} className="w-full h-full object-cover" />
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
 
-            {/* Thumbnails */}
-            {sortedImages.length > 1 && (
-              <div className="grid grid-cols-4 md:grid-cols-6 gap-2">
-                {sortedImages.map((img, idx) => (
-                  <button
-                    key={img.id}
-                    onClick={() => setCurrentImageIndex(idx)}
-                    className={`aspect-video rounded-none overflow-hidden border transition-all duration-300 ${
-                      idx === currentImageIndex 
-                        ? 'border-white' 
-                        : 'border-neutral-800 hover:border-neutral-600'
-                    }`}
-                  >
-                    <img src={img.url} alt={`Thumbnail ${idx + 1}`} className="w-full h-full object-cover" />
-                  </button>
-                ))}
-              </div>
+            {/* Damage Gallery Button */}
+            {(listing.damage_images && listing.damage_images.length > 0) && (
+              <button
+                onClick={() => {
+                  setLightboxSlides(listing.damage_images!.map((url) => ({ src: url })));
+                  setLightboxIndex(0);
+                  setLightboxOpen(true);
+                }}
+                className="w-full px-6 py-3 border border-red-500/30 bg-red-500/5 text-red-400 rounded-none font-light uppercase tracking-widest text-xs hover:bg-red-500/10 transition-all flex items-center justify-center gap-2"
+              >
+                <AlertCircle className="w-4 h-4" strokeWidth={1.5} />
+                Galerija Oštećenja ({listing.damage_images.length})
+              </button>
             )}
 
             {/* Description */}
@@ -251,6 +324,23 @@ export const ListingDetail = () => {
                 })}
               </div>
             </div>
+
+            {/* Equipment Tags - Dodatna Oprema */}
+            {attributes.equipment && Array.isArray(attributes.equipment) && attributes.equipment.length > 0 && (
+              <div className="bg-card border border-neutral-800 rounded-none p-8">
+                <h2 className="text-xs font-light uppercase tracking-widest text-white/40 mb-4">Dodatna Oprema</h2>
+                <div className="flex flex-wrap gap-2">
+                  {attributes.equipment.map((tag: string) => (
+                    <span
+                      key={tag}
+                      className="bg-white/5 border border-border px-3 py-1 text-[10px] uppercase tracking-widest text-white/70"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Right: Sticky Info Panel */}
@@ -347,9 +437,24 @@ export const ListingDetail = () => {
                     Prodavač
                   </h3>
                 </div>
-                <p className="text-sm text-white/80 font-light">
-                  Privatni prodavač
-                </p>
+                <div className="flex items-center gap-2 mb-2">
+                  <p className="text-sm text-white/80 font-light">
+                    {listing.owner?.company_name || 'Privatni prodavač'}
+                  </p>
+                  {(listing.owner?.is_verified || listing.owner?.dealer_verified || listing.owner?.tier === 'premium') && (
+                    <div className="flex items-center gap-1 px-2 py-0.5 bg-white/5 border border-white/10">
+                      <ShieldCheck className="w-3 h-3 text-primary" strokeWidth={2} />
+                      <span className="text-[9px] font-light uppercase tracking-widest text-white/60">
+                        Verificirani
+                      </span>
+                    </div>
+                  )}
+                </div>
+                {listing.owner?.tier === 'premium' && (
+                  <p className="text-[10px] font-light uppercase tracking-widest text-primary/60">
+                    Premium partner
+                  </p>
+                )}
               </div>
             </div>
           </div>
@@ -403,6 +508,18 @@ export const ListingDetail = () => {
           </div>
         </div>
       )}
+
+      {/* Premium Lightbox - Pitch Black Backdrop */}
+      <Lightbox
+        open={lightboxOpen}
+        close={() => setLightboxOpen(false)}
+        slides={lightboxSlides}
+        index={lightboxIndex}
+        plugins={[Zoom, Thumbnails]}
+        styles={{
+          container: { backgroundColor: '#000000' },
+        }}
+      />
     </div>
   );
 };

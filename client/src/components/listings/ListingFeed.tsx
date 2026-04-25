@@ -2,9 +2,10 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { getAnalytics } from '../../lib/analytics';
-import { 
-  Calendar, Gauge, Zap, SlidersHorizontal, ChevronDown, ChevronUp, 
-  Box, Clock, ArrowDown10, ArrowUp01, Eye, ChevronLeft, ChevronRight
+import {
+  Calendar, Gauge, Zap, SlidersHorizontal, ChevronDown, ChevronUp,
+  Box, Clock, ArrowDown10, ArrowUp01, Eye, ChevronLeft, ChevronRight,
+  ShieldCheck, Sparkles
 } from 'lucide-react';
 import { navigationMenu } from '../../config/taxonomy';
 import { globalFilters, categoryFilters, FilterDefinition } from '../../config/filters';
@@ -62,7 +63,7 @@ const SortDropdown = ({ value, onChange }: any) => {
     <div className="relative min-w-[240px]" ref={dropdownRef}>
       <button 
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between bg-card/60 backdrop-blur-sm border border-border/60 pl-4 pr-3 py-3.5 rounded-xl hover:border-primary/50 transition-colors shadow-sm group"
+        className="w-full flex items-center justify-between bg-card/60 backdrop-blur-sm border border-border/60 pl-4 pr-3 py-3.5 rounded-none hover:border-primary/50 transition-colors shadow-sm group"
       >
         <div className="flex items-center gap-2">
           <SelectedIcon className="w-4 h-4 text-primary" />
@@ -74,7 +75,7 @@ const SortDropdown = ({ value, onChange }: any) => {
       </button>
 
       {isOpen && (
-        <div className="absolute top-full right-0 mt-2 w-full bg-card/95 backdrop-blur-xl border border-border/60 rounded-xl shadow-2xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+        <div className="absolute top-full right-0 mt-2 w-full bg-card/95 backdrop-blur-xl border border-border/60 rounded-none shadow-2xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
           {options.map((option) => {
             const Icon = option.icon;
             return (
@@ -138,9 +139,15 @@ const ListingCard = ({ car }: { car: Listing }) => {
     setCurrentImgIdx((prev) => (prev - 1 + sortedImages.length) % sortedImages.length);
   };
 
+  const isVerified = car.owner?.is_verified || car.owner?.dealer_verified || car.owner?.tier === 'premium';
+
   return (
-    <div 
-      className="group flex flex-col bg-card border border-border/40 rounded-2xl overflow-hidden hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-700 ease-premium cursor-pointer h-full shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1)]"
+    <div
+      className={`group flex flex-col border overflow-hidden hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-700 ease-premium cursor-pointer h-full shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1)] ${
+        car.is_featured
+          ? 'bg-primary/5 border-primary/30 rounded-2xl'
+          : 'bg-card border-border/40 rounded-2xl'
+      }`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => { setIsHovered(false); setCurrentImgIdx(0); }}
     >
@@ -192,8 +199,15 @@ const ListingCard = ({ car }: { car: Listing }) => {
         {/* Badges */}
         <div className="absolute top-4 left-4 flex flex-col gap-2 items-start">
           {car.is_featured && (
-            <div className="px-3 py-1.5 bg-white/95 dark:bg-black/95 backdrop-blur-md rounded-lg text-[9px] font-black uppercase tracking-widest text-primary shadow-lg">
-              Premium
+            <div className="px-3 py-1.5 bg-primary text-black backdrop-blur-md rounded-none text-[9px] font-black uppercase tracking-widest shadow-lg flex items-center gap-1.5">
+              <Sparkles className="w-3 h-3" strokeWidth={2} />
+              Istaknuto
+            </div>
+          )}
+          {isVerified && (
+            <div className="px-3 py-1.5 bg-black/80 backdrop-blur-md rounded-none text-[9px] font-light uppercase tracking-widest text-white shadow-lg flex items-center gap-1.5">
+              <ShieldCheck className="w-3 h-3 text-primary" strokeWidth={2} />
+              Verificirani prodavač
             </div>
           )}
         </div>
@@ -242,6 +256,32 @@ const ListingCard = ({ car }: { car: Listing }) => {
   );
 };
 
+// --- INLINE AD COMPONENT ---
+
+const NativeAdSlotEnhanced = () => (
+  <div className="relative bg-primary/5 border border-primary/20 rounded-none overflow-hidden flex flex-col justify-center p-6 md:col-span-2 lg:col-span-2 2xl:col-span-1 h-full min-h-[280px]">
+    <div className="absolute top-3 left-3">
+      <span className="text-[9px] font-light uppercase tracking-widest text-primary/60">
+        Preporučeno
+      </span>
+    </div>
+    <div className="space-y-3">
+      <h4 className="text-lg font-light text-foreground tracking-widest leading-tight">
+        Želite više prodaje?
+      </h4>
+      <p className="text-sm font-light text-muted-foreground leading-relaxed">
+        Postanite Premium partner i dođite do tisuća potencijalnih kupaca.
+      </p>
+      <Link
+        to="/za-partnere"
+        className="inline-block px-6 py-3 bg-primary text-black text-[10px] font-light uppercase tracking-widest hover:bg-primary/90 transition-colors"
+      >
+        Saznajte više
+      </Link>
+    </div>
+  </div>
+);
+
 // --- MAIN FEED COMPONENT ---
 
 export const ListingFeed = () => {
@@ -280,7 +320,7 @@ export const ListingFeed = () => {
         });
       } else {
         // Standard table query
-        query = supabase.from('listings').select('*, categories!inner(slug), listing_images(id, url, is_primary, sort_order)', { count: 'exact' });
+        query = supabase.from('listings').select('*, categories!inner(slug), listing_images(id, url, is_primary, sort_order), users!inner(id, dealer_verified, tier)', { count: 'exact' });
       }
 
       // Base Filters
@@ -323,11 +363,16 @@ export const ListingFeed = () => {
       const { data, count, error } = await query;
       if (error) throw error;
 
+      const normalized = (data as any[] || []).map((item: any) => ({
+        ...item,
+        owner: item.users || item.owner,
+      }));
+
       if (isLoadMore) {
-        setCars(prev => [...prev, ...(data as Listing[] || [])]);
+        setCars(prev => [...prev, ...(normalized as Listing[])]);
         setPage(page + 1);
       } else {
-        setCars(data as Listing[] || []);
+        setCars(normalized as Listing[]);
         setPage(0);
       }
       
@@ -361,7 +406,7 @@ export const ListingFeed = () => {
             {histogramHeights.map((height, idx) => (
               <div 
                 key={idx}
-                className="flex-1 bg-primary/20 rounded-t transition-all duration-300 hover:bg-primary/40"
+                className="flex-1 bg-primary/20 transition-all duration-300 hover:bg-primary/40"
                 style={{ height: `${height}%` }}
               />
             ))}
@@ -375,7 +420,7 @@ export const ListingFeed = () => {
               placeholder="Od" 
               value={filters[`${filter.id}Min`] || ''} 
               onChange={handleFilterChange} 
-              className="w-full bg-background/50 border border-border/60 rounded-lg px-3 py-2 text-xs focus:ring-1 focus:ring-primary outline-none transition-all" 
+              className="w-full bg-background/50 border border-border/60 rounded-none px-3 py-2 text-xs focus:ring-1 focus:ring-primary outline-none transition-all" 
             />
             <input 
               type="number" 
@@ -383,7 +428,7 @@ export const ListingFeed = () => {
               placeholder="Do" 
               value={filters[`${filter.id}Max`] || ''} 
               onChange={handleFilterChange} 
-              className="w-full bg-background/50 border border-border/60 rounded-lg px-3 py-2 text-xs focus:ring-1 focus:ring-primary outline-none transition-all" 
+              className="w-full bg-background/50 border border-border/60 rounded-none px-3 py-2 text-xs focus:ring-1 focus:ring-primary outline-none transition-all" 
             />
           </div>
         </div>
@@ -395,7 +440,7 @@ export const ListingFeed = () => {
         <div className="flex flex-wrap gap-2">
           <button
             onClick={() => setFilters(prev => ({ ...prev, [filter.id]: '' }))}
-            className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-200 ${
+            className={`px-3 py-1.5 rounded-none text-xs font-bold transition-all duration-200 ${
               !filters[filter.id] 
                 ? 'bg-primary text-white border-2 border-primary' 
                 : 'bg-secondary/50 border-2 border-border/40 text-muted-foreground hover:border-primary/50'
@@ -407,7 +452,7 @@ export const ListingFeed = () => {
             <button
               key={opt.value}
               onClick={() => setFilters(prev => ({ ...prev, [filter.id]: String(opt.value) }))}
-              className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-200 ${
+              className={`px-3 py-1.5 rounded-none text-xs font-bold transition-all duration-200 ${
                 filters[filter.id] === String(opt.value)
                   ? 'bg-primary text-white border-2 border-primary'
                   : 'bg-secondary/50 border-2 border-border/40 text-muted-foreground hover:border-primary/50'
@@ -427,7 +472,7 @@ export const ListingFeed = () => {
             <button
               key={opt.value}
               onClick={() => setFilters(prev => ({ ...prev, [filter.id]: String(opt.value) }))}
-              className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-200 ${
+              className={`px-3 py-1.5 rounded-none text-xs font-bold transition-all duration-200 ${
                 filters[filter.id] === String(opt.value)
                   ? 'bg-primary text-white border-2 border-primary'
                   : 'bg-secondary/50 border-2 border-border/40 text-muted-foreground hover:border-primary/50'
@@ -450,9 +495,9 @@ export const ListingFeed = () => {
       
       <aside className="w-full xl:w-[320px] flex-shrink-0">
         <div className="sticky top-24 relative">
-          <div className="absolute inset-0 bg-primary/5 blur-[50px] rounded-3xl -z-10 pointer-events-none"></div>
-          
-          <div className="bg-card/60 backdrop-blur-xl border border-border/40 rounded-2xl p-6 shadow-sm overflow-hidden">
+          <div className="absolute inset-0 bg-primary/5 blur-[50px] rounded-none -z-10 pointer-events-none"></div>
+
+          <div className="bg-card/60 backdrop-blur-xl border border-border/40 rounded-none p-6 shadow-sm overflow-hidden">
             <div className="flex items-center gap-3 mb-6 border-b border-border/40 pb-5">
               <SlidersHorizontal className="w-5 h-5 text-primary" />
               <h3 className="text-sm font-black uppercase tracking-widest text-slate-900 dark:text-slate-100">
@@ -472,7 +517,7 @@ export const ListingFeed = () => {
                         const [lat, lng] = e.target.value.split(',');
                         setFilters(prev => ({ ...prev, lat, lng }));
                       }}
-                      className="w-full bg-background/50 border border-border/60 rounded-lg px-3 py-2 text-xs focus:ring-1 focus:ring-primary appearance-none outline-none transition-all"
+                      className="w-full bg-background/50 border border-border/60 rounded-none px-3 py-2 text-xs focus:ring-1 focus:ring-primary appearance-none outline-none transition-all"
                     >
                       <option value="">Odaberi grad...</option>
                       <option value="45.815,15.981">Zagreb</option>
@@ -542,7 +587,7 @@ export const ListingFeed = () => {
                     // Analytics not initialized yet, silently fail
                   }
                 }}
-                className="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-black uppercase tracking-widest text-[11px] py-4 rounded-xl hover:scale-[1.02] transition-transform duration-300 shadow-xl shadow-slate-900/10 dark:shadow-white/10 mt-6"
+                className="w-full bg-primary text-primary-foreground font-black uppercase tracking-widest text-[11px] py-4 rounded-none hover:scale-[1.02] transition-transform duration-300 shadow-xl mt-6"
               >
                 Primijeni Filtere
               </button>
@@ -578,7 +623,7 @@ export const ListingFeed = () => {
         ) : (
           <>
             {/* Quick Filters Bar */}
-            <div className="mb-8 p-4 bg-card/60 backdrop-blur-xl border border-border/40 rounded-2xl shadow-sm">
+            <div className="mb-8 p-4 bg-card/60 backdrop-blur-xl border border-border/40 rounded-none shadow-sm">
               <div className="flex items-center gap-3 mb-3">
                 <SlidersHorizontal className="w-4 h-4 text-primary" />
                 <h3 className="text-xs font-black uppercase tracking-widest text-muted-foreground">
@@ -588,7 +633,7 @@ export const ListingFeed = () => {
               <div className="flex flex-wrap gap-2">
                 <button
                   onClick={() => setFilters(prev => ({ ...prev, transmission: 'Automatik' }))}
-                  className={`px-4 py-2 rounded-full text-xs font-bold transition-all duration-200 ${
+                  className={`px-4 py-2 rounded-none text-xs font-bold transition-all duration-200 ${
                     filters.transmission === 'Automatik'
                       ? 'bg-primary text-white border-2 border-primary shadow-lg'
                       : 'bg-secondary/50 border-2 border-border/40 text-muted-foreground hover:border-primary/50 hover:scale-105'
@@ -598,7 +643,7 @@ export const ListingFeed = () => {
                 </button>
                 <button
                   onClick={() => setFilters(prev => ({ ...prev, priceMax: '20000' }))}
-                  className={`px-4 py-2 rounded-full text-xs font-bold transition-all duration-200 ${
+                  className={`px-4 py-2 rounded-none text-xs font-bold transition-all duration-200 ${
                     filters.priceMax === '20000'
                       ? 'bg-primary text-white border-2 border-primary shadow-lg'
                       : 'bg-secondary/50 border-2 border-border/40 text-muted-foreground hover:border-primary/50 hover:scale-105'
@@ -608,7 +653,7 @@ export const ListingFeed = () => {
                 </button>
                 <button
                   onClick={() => setFilters(prev => ({ ...prev, yearMin: '2020' }))}
-                  className={`px-4 py-2 rounded-full text-xs font-bold transition-all duration-200 ${
+                  className={`px-4 py-2 rounded-none text-xs font-bold transition-all duration-200 ${
                     filters.yearMin === '2020'
                       ? 'bg-primary text-white border-2 border-primary shadow-lg'
                       : 'bg-secondary/50 border-2 border-border/40 text-muted-foreground hover:border-primary/50 hover:scale-105'
@@ -618,7 +663,7 @@ export const ListingFeed = () => {
                 </button>
                 <button
                   onClick={() => setFilters(prev => ({ ...prev, fuel: 'Struja' }))}
-                  className={`px-4 py-2 rounded-full text-xs font-bold transition-all duration-200 ${
+                  className={`px-4 py-2 rounded-none text-xs font-bold transition-all duration-200 ${
                     filters.fuel === 'Struja'
                       ? 'bg-primary text-white border-2 border-primary shadow-lg'
                       : 'bg-secondary/50 border-2 border-border/40 text-muted-foreground hover:border-primary/50 hover:scale-105'
@@ -628,7 +673,7 @@ export const ListingFeed = () => {
                 </button>
                 <button
                   onClick={() => setFilters(prev => ({ ...prev, mileageMax: '50000' }))}
-                  className={`px-4 py-2 rounded-full text-xs font-bold transition-all duration-200 ${
+                  className={`px-4 py-2 rounded-none text-xs font-bold transition-all duration-200 ${
                     filters.mileageMax === '50000'
                       ? 'bg-primary text-white border-2 border-primary shadow-lg'
                       : 'bg-secondary/50 border-2 border-border/40 text-muted-foreground hover:border-primary/50 hover:scale-105'
@@ -640,7 +685,7 @@ export const ListingFeed = () => {
                 {Object.values(filters).some(v => v) && (
                   <button
                     onClick={() => setFilters({ priceMin: '', priceMax: '', yearMin: '', yearMax: '', mileageMax: '', powerMin: '', lat: '', lng: '', radiusKm: '' })}
-                    className="px-4 py-2 rounded-full text-xs font-bold bg-red-500/10 border-2 border-red-500/40 text-red-600 dark:text-red-400 hover:bg-red-500/20 transition-all duration-200"
+                    className="px-4 py-2 rounded-none text-xs font-bold bg-red-500/10 border-2 border-red-500/40 text-red-600 dark:text-red-400 hover:bg-red-500/20 transition-all duration-200"
                   >
                     ✕ Očisti sve
                   </button>
@@ -649,11 +694,17 @@ export const ListingFeed = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 2xl:grid-cols-3 gap-6 xl:gap-8">
-              {cars.map((car) => (
-                <Link key={car.id} to={`/listing/${car.id}`}>
-                  <ListingCard car={car} />
-                </Link>
-              ))}
+              {cars.flatMap((car, idx) => {
+                const items: React.ReactNode[] = [
+                  <Link key={car.id} to={`/listing/${car.id}`}>
+                    <ListingCard car={car} />
+                  </Link>
+                ];
+                if (idx === 2) {
+                  items.push(<NativeAdSlotEnhanced key="native-ad" />);
+                }
+                return items;
+              })}
             </div>
             
             {hasMore && (
@@ -661,7 +712,7 @@ export const ListingFeed = () => {
                 <button 
                   onClick={() => fetchListings(true)}
                   disabled={loading}
-                  className="px-8 py-4 bg-card border border-border/60 text-slate-900 dark:text-white font-black text-[11px] uppercase tracking-widest rounded-xl hover:bg-secondary transition-colors shadow-sm"
+                  className="px-8 py-4 bg-card border border-border/60 text-slate-900 dark:text-white font-black text-[11px] uppercase tracking-widest rounded-none hover:bg-secondary transition-colors shadow-sm"
                 >
                   {loading ? 'Učitavanje...' : 'Prikaži Više'}
                 </button>

@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Dot } from 'lucide-react';
+import { Dot, Heart } from 'lucide-react';
 import { Listing } from '../../types';
+import { useFavorites } from '../../hooks/useFavorites';
 
 interface ListingCardProps {
   listing: Listing;
@@ -10,6 +11,7 @@ interface ListingCardProps {
 
 export const ListingCard = ({ listing, isLoading = false }: ListingCardProps) => {
   const [showSecondImage, setShowSecondImage] = useState(false);
+  const { isFavorite, toggleFavorite } = useFavorites();
 
   const images = listing.listing_images || [];
   const sortedImages = images.sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
@@ -88,6 +90,17 @@ export const ListingCard = ({ listing, isLoading = false }: ListingCardProps) =>
             </div>
           </div>
         )}
+
+        {/* Favorite Button */}
+        <button
+          onClick={(e) => { e.stopPropagation(); e.preventDefault(); toggleFavorite(listing.id); }}
+          className="absolute top-3 left-3 p-2 z-10 transition-all duration-300 hover:bg-white/10"
+        >
+          <Heart
+            className={`w-5 h-5 transition-colors duration-300 ${isFavorite(listing.id) ? 'text-red-500 fill-red-500' : 'text-white/60 hover:text-white'}`}
+            strokeWidth={1.5}
+          />
+        </button>
 
         {/* Hot Item Badge */}
         {showHotBadge && (

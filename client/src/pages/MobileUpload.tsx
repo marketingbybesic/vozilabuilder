@@ -92,11 +92,11 @@ export const MobileUpload = () => {
   };
 
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center px-4">
+    <div className="min-h-screen bg-background text-foreground flex items-center justify-center px-4">
       <div className="w-full max-w-md space-y-8">
         {/* Header */}
         <div className="text-center space-y-2">
-          <h1 className="text-2xl font-black text-white">Učitaj slike</h1>
+          <h1 className="text-2xl font-black text-foreground">Učitaj slike</h1>
           <p className="text-xs text-neutral-400 uppercase tracking-widest">
             Vozila.hr Mobile Upload
           </p>
@@ -137,9 +137,9 @@ export const MobileUpload = () => {
                 id="mobile-file-input"
               />
               <label htmlFor="mobile-file-input" className="cursor-pointer block">
-                <Upload className="w-12 h-12 text-white/40 mx-auto mb-4" />
-                <p className="text-sm font-black text-white mb-2">Odaberi slike</p>
-                <p className="text-xs text-neutral-400">Kliknite ili prevucite slike</p>
+                <Upload className="w-12 h-12 text-foreground/40 mx-auto mb-4" />
+                <p className="text-sm font-black text-foreground mb-2">Odaberi slike</p>
+                <p className="text-xs text-muted-foreground">Kliknite ili prevucite slike</p>
               </label>
             </div>
 

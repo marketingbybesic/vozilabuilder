@@ -13,6 +13,24 @@ export interface Category {
 
 export type ListingStatus = 'draft' | 'active' | 'sold';
 export type ListingType = 'prodaja' | 'najam';
+export type UserType = 'private' | 'business';
+
+export interface Profile {
+  id: string;
+  email: string;
+  role: 'user' | 'dealer' | 'admin';
+  user_type: UserType;
+  whatsapp_number?: string;
+  vat_id?: string;
+  company_name?: string;
+  office_address?: string;
+  business_phone?: string;
+  dealer_verified: boolean;
+  is_verified?: boolean;
+  tier?: 'free' | 'premium' | 'partner';
+  created_at: string;
+  updated_at: string;
+}
 
 export interface Listing {
   id: string;
@@ -33,7 +51,9 @@ export interface Listing {
   contact_phone?: string;
   contact_email?: string;
   owner_id?: string;
+  owner?: Profile;
   category_slug?: string;
+  damage_images?: string[];
   created_at?: string;
   updated_at?: string;
 }

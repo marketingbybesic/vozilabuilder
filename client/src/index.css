@@ -68,12 +68,44 @@
 
   /* Buttons: Light font with tracking, no rounding (Aston Martin / Porsche mandate) */
   button, a[class*="bg-"], .btn {
-    @apply font-light tracking-[0.15em] rounded-none;
+    @apply font-light tracking-widest rounded-none;
   }
 
   /* Inputs & selects follow the same sharp aesthetic */
   input, select, textarea {
-    @apply rounded-none;
+    @apply rounded-none font-light tracking-widest;
+  }
+}
+
+@layer utilities {
+  /* Porsche Sheen: subtle hover gradient from white tint to transparent */
+  .sheen {
+    background-image: linear-gradient(to top, rgba(255, 255, 255, 0.05), transparent);
+  }
+  .hover\:sheen:hover {
+    background-image: linear-gradient(to top, rgba(255, 255, 255, 0.05), transparent);
+  }
+
+  /* Backdrop-filter fallback: browsers without support see solid dark bg */
+  @supports not (backdrop-filter: blur(1px)) {
+    .backdrop-blur-xl {
+      background-color: rgba(0, 0, 0, 0.85) !important;
+    }
+    .backdrop-blur-lg {
+      background-color: rgba(0, 0, 0, 0.9) !important;
+    }
+    .backdrop-blur-md {
+      background-color: rgba(0, 0, 0, 0.92) !important;
+    }
+  }
+
+  /* Hide scrollbars cross-browser */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
   }
 }
 

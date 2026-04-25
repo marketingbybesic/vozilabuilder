@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Sun, Moon, Heart, Search, User } from 'lucide-react';
+import { Sun, Moon, Heart, User, Search } from 'lucide-react';
 import { SuperSearchModal } from '../search/SuperSearchModal';
 
 export const MobileBottomNav = () => {
@@ -43,59 +43,56 @@ export const MobileBottomNav = () => {
   return (
     <>
       {/* Mobile Bottom Navigation */}
-      <nav className={`lg:hidden fixed bottom-0 left-0 w-full z-[90] transition-transform duration-500 ${
+      <nav className={`lg:hidden fixed bottom-0 w-full bg-background border-t border-border z-[100] transition-transform duration-500 ${
         isHidden ? 'translate-y-full' : 'translate-y-0'
       }`}>
-        {/* Metallic Sheen Effect */}
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent pointer-events-none" />
-        
-        {/* Navigation Content */}
-        <div className="bg-primary/95 backdrop-blur-xl border-t border-white/20 shadow-[0_-10px_40px_rgba(0,0,0,0.3)] relative overflow-hidden">
           <div className="flex items-center justify-evenly px-4 py-3">
-            
+
+            {/* Search */}
+            <button
+              onClick={() => setSearchModalOpen(true)}
+              className="flex flex-col items-center gap-1 p-2 text-foreground hover:bg-muted rounded-none transition-all duration-300 active:scale-95"
+            >
+              <Search className="h-5 w-5" strokeWidth={1.5} />
+              <span className="text-[8px] font-light uppercase tracking-widest">PRETRAGA</span>
+            </button>
+
             {/* Theme Toggle */}
             <button
               onClick={toggleTheme}
-              className="flex flex-col items-center gap-1 p-2 text-white hover:bg-white/10 rounded-lg transition-all duration-300 active:scale-95"
+              className="flex flex-col items-center gap-1 p-2 text-foreground hover:bg-muted rounded-none transition-all duration-300 active:scale-95"
             >
               {isDark ? (
-                <Sun className="h-6 w-6" strokeWidth={2.5} />
+                <Sun className="h-5 w-5" strokeWidth={1.5} />
               ) : (
-                <Moon className="h-6 w-6" strokeWidth={2.5} />
+                <Moon className="h-5 w-5" strokeWidth={1.5} />
               )}
-              <span className="text-[10px] font-bold uppercase tracking-wider">Tema</span>
+              <span className="text-[8px] font-light uppercase tracking-widest">TEMA</span>
             </button>
 
             {/* Favorites */}
             <Link
               to="/favorites"
-              className="relative flex flex-col items-center gap-1 p-2 text-white hover:bg-white/10 rounded-lg transition-all duration-300 active:scale-95"
+              className="relative flex flex-col items-center gap-1 p-2 text-foreground hover:bg-muted rounded-none transition-all duration-300 active:scale-95"
             >
-              <Heart className="h-6 w-6" strokeWidth={2.5} />
+              <Heart className="h-5 w-5" strokeWidth={1.5} />
               {favoritesCount > 0 && (
                 <span className="absolute top-1 right-1 h-4 w-4 bg-white text-primary text-[10px] font-bold flex items-center justify-center rounded-full shadow-md">
                   {favoritesCount}
                 </span>
               )}
-              <span className="text-[10px] font-bold uppercase tracking-wider">Favoriti</span>
+              <span className="text-[8px] font-light uppercase tracking-widest">FAVORITI</span>
             </Link>
 
-            {/* Search - Opens SuperSearchModal */}
-            <button
-              onClick={() => setSearchModalOpen(true)}
-              className="flex flex-col items-center gap-1 p-2 text-white hover:bg-white/10 rounded-lg transition-all duration-300 active:scale-95"
-            >
-              <Search className="h-6 w-6" strokeWidth={2.5} />
-              <span className="text-[10px] font-bold uppercase tracking-wider">Traži</span>
-            </button>
-
             {/* Profile */}
-            <button className="flex flex-col items-center gap-1 p-2 text-white hover:bg-white/10 rounded-lg transition-all duration-300 active:scale-95">
-              <User className="h-6 w-6" strokeWidth={2.5} />
-              <span className="text-[10px] font-bold uppercase tracking-wider">Profil</span>
-            </button>
+            <Link
+              to="/profil"
+              className="flex flex-col items-center gap-1 p-2 text-foreground hover:bg-muted rounded-none transition-all duration-300 active:scale-95"
+            >
+              <User className="h-5 w-5" strokeWidth={1.5} />
+              <span className="text-[8px] font-light uppercase tracking-widest">PROFIL</span>
+            </Link>
           </div>
-        </div>
       </nav>
 
       {/* Super Search Modal */}

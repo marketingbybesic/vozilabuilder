@@ -13,6 +13,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 -- ============================================================================
 
 CREATE TYPE user_role AS ENUM ('user', 'dealer', 'admin');
+CREATE TYPE user_type AS ENUM ('private', 'business');
 CREATE TYPE listing_status AS ENUM ('draft', 'active', 'sold');
 
 -- ============================================================================
@@ -23,7 +24,12 @@ CREATE TABLE users (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     email VARCHAR(255) NOT NULL UNIQUE,
     role user_role NOT NULL DEFAULT 'user',
+    user_type user_type NOT NULL DEFAULT 'private',
     whatsapp_number VARCHAR(20),
+    vat_id VARCHAR(11),
+    company_name VARCHAR(255),
+    office_address VARCHAR(255),
+    business_phone VARCHAR(20),
     dealer_verified BOOLEAN NOT NULL DEFAULT false,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
@@ -33,6 +39,7 @@ CREATE TABLE users (
 CREATE INDEX idx_users_email ON users(email);
 CREATE INDEX idx_users_role ON users(role);
 CREATE INDEX idx_users_dealer_verified ON users(dealer_verified) WHERE dealer_verified = true;
+CREATE INDEX idx_users_user_type ON users(user_type);
 
 -- ============================================================================
 -- TABLE: categories

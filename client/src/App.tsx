@@ -12,6 +12,14 @@ import { ListingWizard } from './components/listings/ListingWizard';
 import { CreateListingWizard } from './components/listings/CreateListingWizard';
 import { ListingDetail } from './components/listings/ListingDetail';
 import { MobileUpload } from './pages/MobileUpload';
+import { Settings } from './pages/Settings';
+import { UserProfile } from './pages/Profile';
+import { Favorites } from './pages/Favorites';
+import { Kontakt } from './pages/Kontakt';
+import { Privacy } from './pages/Privacy';
+import { Terms } from './pages/Terms';
+import { Pricing } from './pages/Pricing';
+import { AdminDashboard } from './components/admin/AdminDashboard';
 
 function App() {
   useEffect(() => {
@@ -34,6 +42,14 @@ function App() {
             <Route path="/create-listing" element={<CreateListingWizard />} />
             <Route path="/listing/:id" element={<ListingDetail />} />
             <Route path="/mobile-upload" element={<MobileUpload />} />
+            <Route path="/postavke" element={<Settings />} />
+            <Route path="/profil" element={<UserProfile />} />
+            <Route path="/favoriti" element={<Favorites />} />
+            <Route path="/kontakt" element={<Kontakt />} />
+            <Route path="/privatnost" element={<Privacy />} />
+            <Route path="/uvjeti-koristenja" element={<Terms />} />
+            <Route path="/za-partnere" element={<Pricing />} />
+            <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/:categorySlug" element={<ListingFeed />} />
           </Routes>
         </main>

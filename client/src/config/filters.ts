@@ -8,6 +8,7 @@ export interface FilterDefinition {
   type: FilterType;
   options?: { label: string; value: string | number }[]; // For selects/radios
   unit?: string; // e.g., 'km', 'KS', 'ccm'
+  group?: 'Tehnički podaci' | 'Oprema' | 'Sigurnost' | 'Opće'; // Filter grouping for modal UI
 }
 
 // GLOBAL FILTERS (Apply to almost everything)
@@ -23,23 +24,23 @@ export const globalFilters: FilterDefinition[] = [
 // CATEGORY SPECIFIC FILTERS (JSONB Attributes)
 export const categoryFilters: Record<string, FilterDefinition[]> = {
   'osobni-automobili': [
-    { id: 'mileage', label: 'Kilometraža', type: 'range', unit: 'km' },
-    { id: 'power', label: 'Snaga motora', type: 'range', unit: 'KS' },
-    { id: 'fuel', label: 'Gorivo', type: 'select', options: [
+    { id: 'mileage', label: 'Kilometraža', type: 'range', unit: 'km', group: 'Tehnički podaci' },
+    { id: 'power', label: 'Snaga motora', type: 'range', unit: 'KS', group: 'Tehnički podaci' },
+    { id: 'fuel', label: 'Gorivo', type: 'select', group: 'Tehnički podaci', options: [
       { label: 'Benzin', value: 'Benzin' },
       { label: 'Diesel', value: 'Diesel' },
       { label: 'Hibrid', value: 'Hibrid' },
       { label: 'Struja', value: 'Struja' }
     ]},
-    { id: 'transmission', label: 'Mjenjač', type: 'radio', options: [
+    { id: 'transmission', label: 'Mjenjač', type: 'radio', group: 'Tehnički podaci', options: [
       { label: 'Ručni', value: 'Ručni' },
       { label: 'Automatik', value: 'Automatik' }
     ]},
-    { id: 'bodyType', label: 'Karoserija', type: 'select', options: [
+    { id: 'bodyType', label: 'Karoserija', type: 'select', group: 'Oprema', options: [
       { label: 'Limuzina', value: 'Limuzina' }, { label: 'Karavan', value: 'Karavan' },
       { label: 'SUV', value: 'SUV' }, { label: 'Coupe', value: 'Coupe' }
     ]},
-    { id: 'drivetrain', label: 'Pogon', type: 'select', options: [
+    { id: 'drivetrain', label: 'Pogon', type: 'select', group: 'Tehnički podaci', options: [
       { label: 'Prednji', value: 'Prednji' }, { label: 'Stražnji', value: 'Stražnji' }, { label: '4x4', value: '4x4' }
     ]}
   ],

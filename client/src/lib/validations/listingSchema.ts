@@ -107,3 +107,23 @@ export const categoryAttributeSchemas = {
   'osobni-automobili': carAttributesSchema,
   // Additional category schemas will be added in future phases
 };
+
+/**
+ * Profile / Business Data Schema
+ * Validates user profile fields including Croatian OIB (VAT ID)
+ */
+export const profileSchema = z.object({
+  userType: z.enum(['private', 'business']).default('private'),
+  vatId: z
+    .string()
+    .regex(/^\d{11}$/, 'OIB mora sadržavati točno 11 znamenki')
+    .optional(),
+  companyName: z.string().min(2, 'Naziv tvrtke je obavezan').optional(),
+  officeAddress: z.string().min(5, 'Adresa ureda je obavezna').optional(),
+  businessPhone: z
+    .string()
+    .regex(/^[+]?[\d\s()-]+$/, 'Neispravan format telefona')
+    .optional(),
+});
+
+export type ProfileFormData = z.infer<typeof profileSchema>;
