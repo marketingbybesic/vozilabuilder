@@ -23,7 +23,7 @@ export const UserProfile = () => {
     const load = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.user) { setLoading(false); return; }
-      const { data } = await supabase.from('users').select('*').eq('id', session.user.id).single();
+      const { data } = await supabase.from('profiles').select('*').eq('id', session.user.id).single();
       if (data) {
         setProfile(data as Profile);
         setForm({
@@ -58,7 +58,7 @@ export const UserProfile = () => {
       payload.office_address = null;
       payload.business_phone = null;
     }
-    await supabase.from('users').update(payload).eq('id', session.user.id);
+    await supabase.from('profiles').update(payload).eq('id', session.user.id);
     setSaving(false);
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);

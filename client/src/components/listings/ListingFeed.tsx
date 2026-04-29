@@ -486,7 +486,7 @@ export const ListingFeed = () => {
       } else {
         query = supabase
           .from('listings')
-          .select('*, categories!inner(slug), listing_images(id, url, is_primary, sort_order), users!inner(id, dealer_verified, tier)', { count: 'exact' });
+          .select('*, categories!inner(slug), listing_images(id, url, is_primary, sort_order)', { count: 'exact' });
       }
 
       query = query.eq('status', 'active');
@@ -522,7 +522,7 @@ export const ListingFeed = () => {
 
       let normalized = (data as any[] || []).map((item: any) => ({
         ...item,
-        owner: item.users || item.owner,
+        owner: item.owner,
       })) as Listing[];
 
       // Client-side weighted sort

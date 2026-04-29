@@ -107,7 +107,7 @@ export const AdminDashboard = () => {
       }
 
       const { data: profile } = await supabase
-        .from('users')
+        .from('profiles')
         .select('role')
         .eq('id', session.user.id)
         .single();

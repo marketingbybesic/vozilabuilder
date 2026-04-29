@@ -137,7 +137,7 @@ const SimilarVehicles = ({ listing }: { listing: Listing }) => {
       try {
         let query = supabase
           .from('listings')
-          .select('*, listing_images(id, url, is_primary, sort_order), users!inner(id, dealer_verified, tier)')
+          .select('*, listing_images(id, url, is_primary, sort_order)')
           .eq('status', 'active')
           .neq('id', listing.id)
           .gte('price', listing.price * 0.8)
@@ -154,7 +154,7 @@ const SimilarVehicles = ({ listing }: { listing: Listing }) => {
 
         const normalized = (data || []).map((item: any) => ({
           ...item,
-          owner: item.users || item.owner,
+          owner: item.owner,
         })) as Listing[];
 
         setSimilar(normalized);
@@ -203,14 +203,14 @@ export const ListingDetail = () => {
       try {
         const { data, error } = await supabase
           .from('listings')
-          .select('*, categories(name, slug), listing_images(id, url, is_primary, sort_order), users!inner(id, dealer_verified, tier, is_verified)')
+          .select('*, categories(name, slug), listing_images(id, url, is_primary, sort_order)')
           .eq('id', id)
           .single();
 
         if (error) throw error;
         const normalized = {
           ...data,
-          owner: (data as any).users || (data as any).owner,
+          owner: (data as any).owner,
         };
         setListing(normalized as Listing);
 
