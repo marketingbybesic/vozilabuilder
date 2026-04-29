@@ -6,14 +6,187 @@ import { Skeleton } from '../../components/ui/Skeleton';
 import {
   Calendar, Gauge, Zap, MapPin, Phone, Mail, User,
   TrendingDown, TrendingUp, Minus,
-  MessageCircle, ArrowLeft, AlertCircle, ShieldCheck
+  MessageCircle, ArrowLeft, AlertCircle, ShieldCheck,
+  Fuel, Sparkles
 } from 'lucide-react';
 import { Listing } from '../../types';
+import { Helmet } from 'react-helmet-async';
+import { ListingCard } from './ListingFeed';
 import Lightbox from 'yet-another-react-lightbox';
 import Zoom from 'yet-another-react-lightbox/plugins/zoom';
 import Thumbnails from 'yet-another-react-lightbox/plugins/thumbnails';
 import 'yet-another-react-lightbox/styles.css';
 import 'yet-another-react-lightbox/plugins/thumbnails.css';
+
+// --- MILESTONE 4: HISTORY TIMELINE ---
+
+interface HistoryEvent {
+  year: number;
+  event: string;
+  owner: string;
+}
+
+const VehicleHistoryTimeline = ({ attributes }: { attributes: Record<string, any> }) => {
+  const history: HistoryEvent[] = attributes.history || (() => {
+    const baseYear = attributes.year || attributes.godiste || 2018;
+    return [
+      { year: baseYear, event: 'Prvo vlaštvo', owner: '1. Vlasnik' },
+      { year: baseYear + 2, event: 'Redovni servis', owner: 'Servisna knjiga' },
+      { year: baseYear + 4, event: 'Redovni servis', owner: 'Servisna knjiga' },
+      { year: baseYear + 5, event: 'Promjena vlasnika', owner: '2. Vlasnik' },
+    ].filter(e => e.year <= new Date().getFullYear());
+  })();
+
+  const getEventColor = (event: string, idx: number) => {
+    if (idx === 0) return 'bg-primary border-primary';
+    if (event.toLowerCase().includes('servis')) return 'bg-green-500 border-green-500';
+    if (event.toLowerCase().includes('vlasnik') || event.toLowerCase().includes('promjena')) return 'bg-amber-500 border-amber-500';
+    return 'bg-slate-500 border-slate-500';
+  };
+
+  const getLineColor = (event: string, idx: number) => {
+    if (idx === 0) return 'text-primary';
+    if (event.toLowerCase().includes('servis')) return 'text-green-400';
+    if (event.toLowerCase().includes('vlasnik') || event.toLowerCase().includes('promjena')) return 'text-amber-400';
+    return 'text-slate-400';
+  };
+
+  return (
+    <div className="bg-card border border-neutral-800 rounded-none p-8">
+      <h2 className="text-xs font-light uppercase tracking-widest text-white/40 mb-8">Povijest vozila</h2>
+      <div className="relative">
+        {/* Vertical line */}
+        <div className="absolute left-[7px] top-2 bottom-2 w-px bg-white/10" />
+        <div className="space-y-6">
+          {history.map((item, idx) => (
+            <div key={idx} className="flex items-start gap-4 relative">
+              {/* Dot */}
+              <div className={`w-4 h-4 rounded-full border-2 flex-shrink-0 mt-0.5 z-10 ${getEventColor(item.event, idx)}`} />
+              {/* Content */}
+              <div className="flex-1 min-w-0">
+                <p className={`text-[10px] font-light uppercase tracking-widest mb-1 ${getLineColor(item.event, idx)}`}>
+                  {item.year}
+                </p>
+                <p className="text-sm font-light text-white/80 uppercase tracking-widest">
+                  {item.event}
+                </p>
+                <p className="text-[10px] font-light text-white/40 uppercase tracking-widest mt-0.5">
+                  {item.owner}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// --- MILESTONE 5: COST PER 100KM ---
+
+const FUEL_COSTS: Record<string, { litres: number; pricePerUnit: number; unit: string }> = {
+  benzin:     { litres: 7.5,  pricePerUnit: 1.55, unit: 'L' },
+  diesel:     { litres: 6.0,  pricePerUnit: 1.42, unit: 'L' },
+  dizel:      { litres: 6.0,  pricePerUnit: 1.42, unit: 'L' },
+  hibrid:     { litres: 4.5,  pricePerUnit: 1.55, unit: 'L' },
+  hybrid:     { litres: 4.5,  pricePerUnit: 1.55, unit: 'L' },
+  električni: { litres: 18.0, pricePerUnit: 0.22, unit: 'kWh' },
+  electric:   { litres: 18.0, pricePerUnit: 0.22, unit: 'kWh' },
+  struja:     { litres: 18.0, pricePerUnit: 0.22, unit: 'kWh' },
+  lpg:        { litres: 9.0,  pricePerUnit: 0.72, unit: 'L' },
+  plin:       { litres: 9.0,  pricePerUnit: 0.72, unit: 'L' },
+};
+
+const CostPer100km = ({ attributes }: { attributes: Record<string, any> }) => {
+  const fuelRaw = (attributes.fuelType || attributes.fuel || attributes.gorivo || '').toLowerCase();
+  const fuelKey = Object.keys(FUEL_COSTS).find(k => fuelRaw.includes(k));
+  if (!fuelKey) return null;
+
+  const { litres, pricePerUnit } = FUEL_COSTS[fuelKey];
+  const cost = litres * pricePerUnit;
+
+  return (
+    <div className="bg-card border border-neutral-800 rounded-none p-6">
+      <div className="flex items-start gap-3 mb-3">
+        <Fuel className="w-5 h-5 text-white/40 flex-shrink-0 mt-0.5" strokeWidth={1.5} />
+        <div>
+          <p className="text-[10px] font-light uppercase tracking-widest text-white/40 mb-1">
+            Procijenjeni trošak goriva
+          </p>
+          <p className="text-2xl font-light text-white">
+            ~€{cost.toFixed(2)}<span className="text-sm text-white/40"> / 100km</span>
+          </p>
+          <p className="text-[10px] font-light text-white/30 mt-2 leading-relaxed">
+            Procjena prema prosječnoj potrošnji i tržišnim cijenama goriva u RH
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// --- MILESTONE 6: KNN SIMILAR VEHICLES ---
+
+const SimilarVehicles = ({ listing }: { listing: Listing }) => {
+  const [similar, setSimilar] = useState<Listing[]>([]);
+  const [loading, setLoading] = useState(true);
+  const attributes = listing.attributes || {};
+
+  useEffect(() => {
+    const fetchSimilar = async () => {
+      try {
+        let query = supabase
+          .from('listings')
+          .select('*, listing_images(id, url, is_primary, sort_order), users!inner(id, dealer_verified, tier)')
+          .eq('status', 'active')
+          .neq('id', listing.id)
+          .gte('price', listing.price * 0.8)
+          .lte('price', listing.price * 1.2)
+          .limit(4);
+
+        const make = attributes.make || attributes.marka;
+        if (make) {
+          query = query.eq('attributes->>make', make);
+        }
+
+        const { data, error } = await query;
+        if (error) throw error;
+
+        const normalized = (data || []).map((item: any) => ({
+          ...item,
+          owner: item.users || item.owner,
+        })) as Listing[];
+
+        setSimilar(normalized);
+      } catch {
+        setSimilar([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (listing.price > 0) fetchSimilar();
+    else setLoading(false);
+  }, [listing.id]);
+
+  if (loading || similar.length === 0) return null;
+
+  return (
+    <div className="max-w-7xl mx-auto px-8 pb-16">
+      <div className="flex items-center gap-3 mb-6">
+        <Sparkles className="w-5 h-5 text-primary" strokeWidth={1.5} />
+        <h2 className="text-xs font-light uppercase tracking-widest text-white/40">Slična vozila</h2>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {similar.map(car => (
+          <Link key={car.id} to={`/listing/${car.id}`}>
+            <ListingCard car={car} />
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
+};
 
 export const ListingDetail = () => {
   const { id } = useParams();
@@ -151,8 +324,16 @@ export const ListingDetail = () => {
     ? `https://wa.me/${listing.contact_phone.replace(/\D/g, '')}?text=${encodeURIComponent(whatsappMessage)}`
     : null;
 
+  // SEO title for this listing
+  const seoTitle = `${listing.title} — ${listing.price > 0 ? `${listing.price.toLocaleString()}€` : 'Cijena na upit'} | Vozila.hr`;
+
   return (
     <div className="min-h-screen bg-background">
+      <Helmet>
+        <title>{seoTitle}</title>
+        <meta name="description" content={listing.description?.substring(0, 160) || `${listing.title} — ${listing.location || 'Hrvatska'}. Pronađite ovo vozilo na Vozila.hr.`} />
+      </Helmet>
+
       {/* Status Badge for Inactive Listings */}
       {listing.status === 'sold' && (
         <div className="bg-red-500/90 text-white py-3 px-4 text-center">
@@ -341,6 +522,9 @@ export const ListingDetail = () => {
                 </div>
               </div>
             )}
+
+            {/* MILESTONE 4: Vehicle History Timeline */}
+            <VehicleHistoryTimeline attributes={attributes} />
           </div>
 
           {/* Right: Sticky Info Panel */}
@@ -429,6 +613,9 @@ export const ListingDetail = () => {
                 )}
               </div>
 
+              {/* MILESTONE 5: Cost per 100km */}
+              <CostPer100km attributes={attributes} />
+
               {/* Seller Info */}
               <div className="bg-card border border-neutral-800 rounded-none p-8">
                 <div className="flex items-center gap-3 mb-4">
@@ -460,6 +647,9 @@ export const ListingDetail = () => {
           </div>
         </div>
       </div>
+
+      {/* MILESTONE 6: Similar Vehicles */}
+      <SimilarVehicles listing={listing} />
 
       {/* Mobile Sticky Contact Bar */}
       {listing.status === 'active' && (

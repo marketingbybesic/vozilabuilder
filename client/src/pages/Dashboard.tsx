@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { Skeleton } from '../components/ui/Skeleton';
-import { 
+import { PromoteListingButton } from '../components/listings/PromoteListingButton';
+import {
   Plus, Eye, MoreVertical, Car as CarIcon,
   ToggleLeft, ToggleRight, TrendingUp
 } from 'lucide-react';
@@ -274,6 +275,9 @@ export const Dashboard = () => {
                     <th className="text-left px-6 py-4 text-xs font-black uppercase tracking-widest text-neutral-400">
                       Status
                     </th>
+                    <th className="text-left px-6 py-4 text-xs font-black uppercase tracking-widest text-neutral-400">
+                      Promocija
+                    </th>
                     <th className="text-right px-6 py-4 text-xs font-black uppercase tracking-widest text-neutral-400">
                       Akcije
                     </th>
@@ -307,6 +311,12 @@ export const Dashboard = () => {
                         <span className={`px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest ${getStatusColor(listing.status)}`}>
                           {getStatusText(listing.status)}
                         </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <PromoteListingButton
+                          listingId={listing.id}
+                          onPromoted={fetchListings}
+                        />
                       </td>
                       <td className="px-6 py-4 text-right">
                         <button

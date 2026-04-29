@@ -16,6 +16,12 @@
     "concurrently": "^8.2.2"
   },
   "dependencies": {
-    "framer-motion": "^12.38.0"
+    "clsx": "^2.1.1",
+    "dexie": "^4.4.2",
+    "framer-motion": "^12.38.0",
+    "lucide-react": "^1.11.0",
+    "tailwind-merge": "^3.5.0",
+    "zod": "^4.3.6",
+    "zustand": "^5.0.12"
   }
 }

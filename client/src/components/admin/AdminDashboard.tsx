@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
+import { runSeed } from '../../lib/runSeed';
 import {
   LayoutDashboard, Users, Car, TrendingUp, AlertCircle,
-  ShieldCheck, ChevronRight
+  ShieldCheck, ChevronRight, DatabaseZap, CheckCircle
 } from 'lucide-react';
 
 interface KpiCardProps {
@@ -93,6 +94,8 @@ const PlaceholderTable = ({
 export const AdminDashboard = () => {
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(true);
+  const [seeding, setSeeding] = useState(false);
+  const [seedResult, setSeedResult] = useState<{ inserted: number; errors: string[] } | null>(null);
 
   useEffect(() => {
     const checkAdmin = async () => {
@@ -115,6 +118,20 @@ export const AdminDashboard = () => {
 
     checkAdmin();
   }, []);
+
+  const handleSeed = async () => {
+    if (!confirm('Insertati 50 testnih oglasa u bazu podataka?')) return;
+    setSeeding(true);
+    setSeedResult(null);
+    try {
+      const result = await runSeed();
+      setSeedResult({ inserted: result.inserted, errors: result.errors });
+    } catch (err: any) {
+      setSeedResult({ inserted: 0, errors: [err?.message || 'Nepoznata greška'] });
+    } finally {
+      setSeeding(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -203,17 +220,82 @@ export const AdminDashboard = () => {
           />
         </div>
 
-        {/* Alert placeholder */}
-        <div className="mt-8 bg-white/[0.02] border border-neutral-800 rounded-none p-6 flex items-start gap-4">
-          <AlertCircle className="w-5 h-5 text-white/40 flex-shrink-0 mt-0.5" strokeWidth={1.5} />
-          <div>
-            <p className="text-sm font-light text-white/70 mb-1">
-              Admin funkcionalnost u razvoju
-            </p>
-            <p className="text-xs font-light text-white/40 leading-relaxed">
-              Puni KPI podaci, upravljanje korisnicima i moderacija oglasa dolaze u sljedećoj fazi.
-              Tabele će se dinamički puniti iz baze podataka nakon implementacije back-end servisa.
-            </p>
+        {/* Seed Data Section */}
+        <div className="mt-8 space-y-4">
+          <div className="bg-white/[0.02] border border-neutral-800 rounded-none p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-start gap-4">
+              <DatabaseZap className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" strokeWidth={1.5} />
+              <div>
+                <p className="text-sm font-light text-white/70 mb-1 uppercase tracking-widest">
+                  Seed baze podataka
+                </p>
+                <p className="text-xs font-light text-white/40 leading-relaxed">
+                  Insertiraj 50 realnih hrvatskih oglasa za testiranje i razvoj.
+                  Zahtijeva kategoriju "osobni-automobili" u bazi.
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={handleSeed}
+              disabled={seeding}
+              className="flex-shrink-0 flex items-center gap-2 px-6 py-3 bg-primary text-black rounded-none font-light uppercase tracking-widest text-xs hover:bg-primary/90 transition-all disabled:opacity-50 disabled:cursor-wait"
+            >
+              {seeding ? (
+                <>
+                  <span className="w-3 h-3 border border-black/30 border-t-black rounded-full animate-spin" />
+                  Seediranje...
+                </>
+              ) : (
+                <>
+                  <DatabaseZap className="w-4 h-4" strokeWidth={1.5} />
+                  Pokreni Seed
+                </>
+              )}
+            </button>
+          </div>
+
+          {seedResult && (
+            <div className={`border rounded-none p-4 flex items-start gap-3 ${
+              seedResult.errors.length === 0
+                ? 'border-green-500/30 bg-green-500/5'
+                : 'border-amber-500/30 bg-amber-500/5'
+            }`}>
+              <CheckCircle className={`w-4 h-4 flex-shrink-0 mt-0.5 ${
+                seedResult.errors.length === 0 ? 'text-green-400' : 'text-amber-400'
+              }`} strokeWidth={1.5} />
+              <div className="space-y-1">
+                <p className="text-xs font-light uppercase tracking-widest text-white/70">
+                  Insertirano: {seedResult.inserted} oglasa
+                </p>
+                {seedResult.errors.length > 0 && (
+                  <ul className="space-y-0.5">
+                    {seedResult.errors.slice(0, 5).map((err, i) => (
+                      <li key={i} className="text-[10px] font-light text-amber-400/80 uppercase tracking-widest">
+                        {err}
+                      </li>
+                    ))}
+                    {seedResult.errors.length > 5 && (
+                      <li className="text-[10px] font-light text-white/30 uppercase tracking-widest">
+                        +{seedResult.errors.length - 5} više grešaka
+                      </li>
+                    )}
+                  </ul>
+                )}
+              </div>
+            </div>
+          )}
+
+          <div className="bg-white/[0.02] border border-neutral-800 rounded-none p-6 flex items-start gap-4">
+            <AlertCircle className="w-5 h-5 text-white/40 flex-shrink-0 mt-0.5" strokeWidth={1.5} />
+            <div>
+              <p className="text-sm font-light text-white/70 mb-1">
+                Admin funkcionalnost u razvoju
+              </p>
+              <p className="text-xs font-light text-white/40 leading-relaxed">
+                Puni KPI podaci, upravljanje korisnicima i moderacija oglasa dolaze u sljedećoj fazi.
+                Tabele će se dinamički puniti iz baze podataka nakon implementacije back-end servisa.
+              </p>
+            </div>
           </div>
         </div>
       </div>

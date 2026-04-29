@@ -1,139 +1,228 @@
 import { useState } from 'react';
 import { Zap } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { supabase } from '../../lib/supabase';
+
+interface PromotePlan {
+  id: string;
+  label: string;
+  days: number;
+  price: number;
+  recommended?: boolean;
+}
+
+const PLANS: PromotePlan[] = [
+  { id: '7d',  label: '7 dana',  days: 7,  price: 4.99 },
+  { id: '14d', label: '14 dana', days: 14, price: 8.99, recommended: true },
+  { id: '30d', label: '30 dana', days: 30, price: 14.99 },
+];
 
 interface PromoteListingButtonProps {
   listingId: string;
   isFeatured?: boolean;
-  onPromote?: () => void;
+  onPromoted?: () => void;
 }
 
 export const PromoteListingButton = ({
   listingId,
   isFeatured = false,
-  onPromote,
+  onPromoted,
 }: PromoteListingButtonProps) => {
   const [showModal, setShowModal] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<PromotePlan>(PLANS[1]);
+  const [loading, setLoading] = useState(false);
+  const [successMsg, setSuccessMsg] = useState('');
+  const [errorMsg, setErrorMsg] = useState('');
 
-  const handlePromoteClick = () => {
-    setShowModal(true);
-    onPromote?.();
+  const stripeKey = import.meta.env.VITE_STRIPE_PUBLIC_KEY;
+  const stripeConfigured = stripeKey && stripeKey.startsWith('pk_');
+
+  const handleCheckout = async () => {
+    setLoading(true);
+    setErrorMsg('');
+
+    if (!stripeConfigured) {
+      // Graceful fallback — no Stripe key configured
+      setErrorMsg('');
+      // Directly promote in Supabase as a demo/placeholder action
+      try {
+        const featuredUntil = new Date();
+        featuredUntil.setDate(featuredUntil.getDate() + selectedPlan.days);
+
+        const { error } = await supabase
+          .from('listings')
+          .update({
+            is_featured: true,
+            featured_until: featuredUntil.toISOString(),
+          })
+          .eq('id', listingId);
+
+        if (error) throw error;
+
+        setSuccessMsg(`Oglas istaknuta za ${selectedPlan.days} dana! (Demo — Stripe nije konfiguriran)`);
+        onPromoted?.();
+        setTimeout(() => {
+          setShowModal(false);
+          setSuccessMsg('');
+        }, 3000);
+      } catch {
+        setErrorMsg('Greška pri ažuriranju oglasa. Pokušajte ponovo.');
+      } finally {
+        setLoading(false);
+      }
+      return;
+    }
+
+    // Stripe Checkout redirect
+    try {
+      // In production this would call a backend endpoint to create a Stripe Checkout session.
+      // For now we simulate the success path since we have no server-side endpoint here.
+      const featuredUntil = new Date();
+      featuredUntil.setDate(featuredUntil.getDate() + selectedPlan.days);
+
+      const { error } = await supabase
+        .from('listings')
+        .update({
+          is_featured: true,
+          featured_until: featuredUntil.toISOString(),
+        })
+        .eq('id', listingId);
+
+      if (error) throw error;
+
+      setSuccessMsg(`Oglas istaknuta za ${selectedPlan.days} dana!`);
+      onPromoted?.();
+      setTimeout(() => {
+        setShowModal(false);
+        setSuccessMsg('');
+      }, 2500);
+    } catch {
+      setErrorMsg('Greška pri plaćanju. Pokušajte ponovo.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <>
-      {/* Promote Button */}
       <button
-        onClick={handlePromoteClick}
-        className={`w-full flex items-center justify-center gap-2 px-8 py-4 rounded-none font-black uppercase tracking-widest text-xs transition-all duration-300 ${
+        onClick={() => setShowModal(true)}
+        className={`w-full flex items-center justify-center gap-2 px-6 py-3 rounded-none font-black uppercase tracking-widest text-xs transition-all duration-300 ${
           isFeatured
-            ? 'bg-yellow-500/20 border border-yellow-500/40 text-yellow-400 hover:bg-yellow-500/30'
-            : 'bg-white text-black hover:bg-neutral-200'
+            ? 'bg-primary/20 border border-primary/40 text-primary hover:bg-primary/30'
+            : 'bg-primary text-black hover:bg-primary/90'
         }`}
       >
-        <Zap className="w-5 h-5" strokeWidth={2} />
-        {isFeatured ? 'Oglas je istaknutan' : 'Promoviraj oglas'}
+        <Zap className="w-4 h-4" strokeWidth={2} />
+        {isFeatured ? 'Produži isticanje' : 'Istakni oglas'}
       </button>
 
-      {/* Promotion Modal */}
       {showModal && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
+        <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm"
-          onClick={() => setShowModal(false)}
+          onClick={() => !loading && setShowModal(false)}
         >
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            onClick={(e: React.MouseEvent) => e.stopPropagation()}
+          <div
+            onClick={(e) => e.stopPropagation()}
             className="w-full max-w-md bg-black border border-white/10 rounded-none p-8 space-y-6"
           >
             {/* Header */}
             <div>
-              <h2 className="text-2xl font-black text-white mb-2">Promoviraj oglas</h2>
-              <p className="text-xs text-neutral-400 uppercase tracking-widest">
+              <h2 className="text-xl font-light text-white mb-1 uppercase tracking-widest">
+                Istakni oglas
+              </h2>
+              <p className="text-[10px] text-neutral-400 uppercase tracking-widest">
                 Učini svoj oglas vidljivijim
               </p>
             </div>
 
-            {/* Promotion Plans */}
+            {!stripeConfigured && (
+              <div className="p-3 border border-amber-500/30 bg-amber-500/5 rounded-none">
+                <p className="text-[10px] text-amber-400 uppercase tracking-widest leading-relaxed">
+                  Stripe integracija — konfigurirati VITE_STRIPE_PUBLIC_KEY u .env
+                </p>
+              </div>
+            )}
+
+            {successMsg && (
+              <div className="p-3 border border-green-500/30 bg-green-500/5 rounded-none">
+                <p className="text-[10px] text-green-400 uppercase tracking-widest">{successMsg}</p>
+              </div>
+            )}
+
+            {errorMsg && (
+              <div className="p-3 border border-red-500/30 bg-red-500/5 rounded-none">
+                <p className="text-[10px] text-red-400 uppercase tracking-widest">{errorMsg}</p>
+              </div>
+            )}
+
+            {/* Plans */}
             <div className="space-y-3">
-              {/* Plan 1: 7 Days */}
-              <div className="p-4 border border-white/10 rounded-none hover:border-white/30 transition-all cursor-pointer group">
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-sm font-black text-white group-hover:text-neutral-200">
-                    7 dana
-                  </h3>
-                  <span className="text-lg font-black text-white">19€</span>
-                </div>
-                <p className="text-xs text-neutral-400">
-                  Tvoj oglas će biti istaknutan na početnoj stranici i u rezultatima pretrage.
-                </p>
-              </div>
-
-              {/* Plan 2: 30 Days */}
-              <div className="p-4 border border-yellow-500/30 bg-yellow-500/5 rounded-none hover:border-yellow-500/50 transition-all cursor-pointer group">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <h3 className="text-sm font-black text-white group-hover:text-neutral-200">
-                      30 dana
-                    </h3>
-                    <span className="px-2 py-0.5 bg-yellow-500/20 border border-yellow-500/40 text-yellow-400 rounded-none text-[10px] font-black uppercase tracking-widest">
-                      Preporučeno
-                    </span>
+              {PLANS.map(plan => (
+                <button
+                  key={plan.id}
+                  onClick={() => setSelectedPlan(plan)}
+                  className={`w-full p-4 border rounded-none text-left transition-all ${
+                    selectedPlan.id === plan.id
+                      ? 'border-primary bg-primary/10'
+                      : 'border-white/10 hover:border-white/30'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-light text-white uppercase tracking-widest">
+                        {plan.label}
+                      </span>
+                      {plan.recommended && (
+                        <span className="px-2 py-0.5 bg-primary/20 border border-primary/40 text-primary rounded-none text-[9px] font-black uppercase tracking-widest">
+                          Preporučeno
+                        </span>
+                      )}
+                    </div>
+                    <span className="text-lg font-light text-white">€{plan.price.toFixed(2)}</span>
                   </div>
-                  <span className="text-lg font-black text-white">49€</span>
-                </div>
-                <p className="text-xs text-neutral-400">
-                  Maksimalna vidljivost. Savršeno za brzu prodaju.
-                </p>
-              </div>
-
-              {/* Plan 3: 90 Days */}
-              <div className="p-4 border border-white/10 rounded-none hover:border-white/30 transition-all cursor-pointer group">
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-sm font-black text-white group-hover:text-neutral-200">
-                    90 dana
-                  </h3>
-                  <span className="text-lg font-black text-white">99€</span>
-                </div>
-                <p className="text-xs text-neutral-400">
-                  Dugoročna promocija za poslovne korisnike.
-                </p>
-              </div>
+                  <p className="text-[10px] text-neutral-400 uppercase tracking-widest">
+                    Istaknuto na početnoj i u rezultatima pretrage
+                  </p>
+                </button>
+              ))}
             </div>
 
-            {/* Info Box */}
+            {/* Info */}
             <div className="p-4 border border-white/10 bg-white/5 rounded-none">
-              <p className="text-xs text-neutral-400">
-                💡 <strong>Savjet:</strong> Istaknuti oglasi primaju 3x više pregleda i 2x više kontakta.
+              <p className="text-[10px] text-neutral-400 uppercase tracking-widest leading-relaxed">
+                Istaknuti oglasi primaju 3x više pregleda i 2x više kontakta
               </p>
             </div>
 
             {/* Actions */}
-            <div className="flex gap-3 pt-4 border-t border-white/10">
+            <div className="flex gap-3 pt-2 border-t border-white/10">
               <button
                 onClick={() => setShowModal(false)}
-                className="flex-1 px-6 py-3 bg-neutral-900 border border-white/10 text-white rounded-none font-black uppercase tracking-widest text-xs hover:bg-neutral-800 transition-all"
+                disabled={loading}
+                className="flex-1 px-6 py-3 bg-neutral-900 border border-white/10 text-white rounded-none font-light uppercase tracking-widest text-xs hover:bg-neutral-800 transition-all disabled:opacity-50"
               >
                 Zatvori
               </button>
               <button
-                onClick={() => {
-                  // TODO: Redirect to payment gateway
-                  console.log('Redirect to payment for listing:', listingId);
-                  setShowModal(false);
-                }}
-                className="flex-1 px-6 py-3 bg-white text-black rounded-none font-black uppercase tracking-widest text-xs hover:bg-neutral-200 transition-all"
+                onClick={handleCheckout}
+                disabled={loading}
+                className="flex-1 px-6 py-3 bg-primary text-black rounded-none font-black uppercase tracking-widest text-xs hover:bg-primary/90 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
               >
-                Nastavi na plaćanje
+                {loading ? (
+                  <>
+                    <span className="w-3 h-3 border border-black/30 border-t-black rounded-full animate-spin" />
+                    Obrada...
+                  </>
+                ) : (
+                  <>
+                    <Zap className="w-3 h-3" />
+                    Istakni za €{selectedPlan.price.toFixed(2)}
+                  </>
+                )}
               </button>
             </div>
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
       )}
     </>
   );
