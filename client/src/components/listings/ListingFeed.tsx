@@ -16,6 +16,7 @@ import { onImgError } from '../../lib/imageFallback';
 import { matchScore } from '../../lib/matchScore';
 import { SavedSearchesBar, buildLabel } from '../search/SavedSearches';
 import { getLocationSilently } from '../../lib/locationDefaults';
+import { countNewSince, markSeen } from '../../lib/freshness';
 
 const ITEMS_PER_PAGE = 9;
 
@@ -633,21 +634,51 @@ export const ListingFeed = () => {
     queryState.year_min, queryState.year_max, queryState.mileage_max, queryState.power_min,
     queryState.fuel, queryState.transmission, queryState.sort, queryState.lat, queryState.lng, queryState.radius]);
 
-  // One-time: if URL has no lat/lng yet, silently pre-fill with the user's
-  // approximate location (cached → IP fallback). Doesn't auto-apply radius
-  // search — just primes the LocationFilter widget so the user only has to
-  // set a radius to get nearby results.
+  // One-time: silently capture the user's approximate location (cached →
+  // IP fallback) and stash it on a window global for the LocationFilter
+  // widget to read as a default. We do NOT push it into URL state — that
+  // would auto-trigger the radius search RPC (which needs `radius` set
+  // and doesn't support category-slug filtering). The user opts in by
+  // setting a radius themselves.
   const [locationPrimed, setLocationPrimed] = useState(false);
   useEffect(() => {
     if (locationPrimed) return;
-    if (queryState.lat && queryState.lng) { setLocationPrimed(true); return; }
     getLocationSilently().then((loc) => {
-      if (!queryState.lat && !queryState.lng) {
-        setQueryState({ lat: String(loc.lat), lng: String(loc.lng) } as any);
-      }
+      (window as any).__vozila_default_location__ = loc;
       setLocationPrimed(true);
     }).catch(() => setLocationPrimed(true));
-  }, [locationPrimed, queryState.lat, queryState.lng, setQueryState]);
+  }, [locationPrimed]);
+
+  // Fresh-listing pulse: count items new since last visit to this category,
+  // then mark the newest as seen (so the pulse clears after this render).
+  const freshCount = (() => {
+    const slug = categorySlug || 'all';
+    return countNewSince(slug, cars.map((c) => c.created_at));
+  })();
+  const [showPulse, setShowPulse] = useState(false);
+  useEffect(() => {
+    if (cars.length === 0) return;
+    const slug = categorySlug || 'all';
+    if (freshCount > 0) {
+      setShowPulse(true);
+      const t = setTimeout(() => setShowPulse(false), 4500);
+      // mark newest seen so the pulse doesn't repeat on re-render
+      const newest = cars.reduce((acc, c) => {
+        const t = c.created_at ? new Date(c.created_at).getTime() : 0;
+        return t > acc ? t : acc;
+      }, 0);
+      if (newest > 0) markSeen(slug, new Date(newest));
+      return () => clearTimeout(t);
+    } else {
+      // First visit ever — establish the baseline so a future visit can
+      // detect new arrivals (only triggers when there's at least one car)
+      const newest = cars.reduce((acc, c) => {
+        const t = c.created_at ? new Date(c.created_at).getTime() : 0;
+        return t > acc ? t : acc;
+      }, 0);
+      if (newest > 0) markSeen(slug, new Date(newest));
+    }
+  }, [categorySlug, cars.length]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const setFilter = (key: string, value: string | number) => {
     setQueryState({ [key]: value || null } as any);
@@ -936,6 +967,18 @@ export const ListingFeed = () => {
             categorySlug={categorySlug || undefined}
           />
 
+          {/* Fresh-listing pulse — appears for 4.5s when new oglasi land
+              since the user's last visit to this category */}
+          {showPulse && freshCount > 0 && (
+            <div className="mb-4 inline-flex items-center gap-3 px-4 py-2 border border-primary/40 bg-primary/5 text-primary text-[10px] font-light uppercase tracking-[0.25em] animate-in fade-in slide-in-from-top-2 duration-500">
+              <span className="relative inline-flex w-2 h-2">
+                <span className="absolute inline-flex h-full w-full bg-primary opacity-60 animate-ping" />
+                <span className="relative inline-flex w-2 h-2 bg-primary" />
+              </span>
+              {freshCount} {freshCount === 1 ? 'novi oglas' : freshCount < 5 ? 'nova oglasa' : 'novih oglasa'} od zadnjeg posjeta
+            </div>
+          )}
+
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
             <div>
               <h2 className="text-3xl md:text-4xl font-light uppercase tracking-[0.08em] text-foreground">
@@ -959,11 +1002,63 @@ export const ListingFeed = () => {
               isSpinning={true}
             />
           ) : cars.length === 0 ? (
-            <StateDisplay
-              icon={CategoryIcon}
-              title="Nema Rezultata"
-              subtitle="Trenutno nema vozila koja odgovaraju vašim kriterijima. Pokušajte izmijeniti filtere."
-            />
+            // Engaging empty state — save search + reset + browse-similar
+            <div className="border border-border bg-muted/20 p-8 sm:p-12 text-center">
+              <div className="inline-flex items-center justify-center w-16 h-16 mb-6 border border-border">
+                {CategoryIcon ? <CategoryIcon className="w-7 h-7 text-muted-foreground" strokeWidth={1.5} /> : null}
+              </div>
+              <h3 className="text-xl sm:text-2xl font-light uppercase tracking-[0.08em] text-foreground mb-2">
+                Nema rezultata
+              </h3>
+              <p className="text-sm font-light text-muted-foreground max-w-md mx-auto leading-relaxed">
+                Trenutno nema vozila koja odgovaraju vašim kriterijima. Spremite pretragu — javit ćemo se kad se pojavi novo vozilo.
+              </p>
+              <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+                <button
+                  onClick={() => {
+                    const url = typeof window !== 'undefined' ? window.location.pathname + window.location.search : '/';
+                    const label = buildLabel(queryState as any, displayTitle);
+                    if (label) {
+                      // saveSearch is already imported via SavedSearchesBar's helper; call indirectly by dispatching a synthetic click
+                      // Simpler: just write directly via the localStorage hook
+                      import('../../lib/savedSearches').then(({ saveSearch }) => saveSearch(url, label, [], categorySlug || undefined));
+                    }
+                  }}
+                  className="inline-flex items-center gap-2 px-4 py-2.5 bg-primary text-primary-foreground text-[10px] font-light uppercase tracking-[0.25em] hover:bg-primary/90 transition-colors"
+                >
+                  Spremi pretragu
+                </button>
+                <button
+                  onClick={clearAllFilters}
+                  className="inline-flex items-center gap-2 px-4 py-2.5 border border-border text-foreground text-[10px] font-light uppercase tracking-[0.25em] hover:border-primary hover:text-primary transition-colors"
+                >
+                  Resetiraj filtere
+                </button>
+                <Link
+                  to="/pretraga"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 border border-border text-muted-foreground text-[10px] font-light uppercase tracking-[0.25em] hover:border-foreground hover:text-foreground transition-colors"
+                >
+                  Sva vozila
+                </Link>
+              </div>
+              {/* Suggest related categories */}
+              <div className="mt-10 pt-8 border-t border-border/50">
+                <p className="text-[10px] font-light uppercase tracking-[0.3em] text-muted-foreground mb-4">
+                  Pogledaj druge kategorije
+                </p>
+                <div className="flex flex-wrap items-center justify-center gap-3">
+                  {navigationMenu.filter((c) => c.slug !== categorySlug).slice(0, 6).map((c) => (
+                    <Link
+                      key={c.slug}
+                      to={`/${c.slug}`}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-light uppercase tracking-[0.2em] border border-border/60 text-muted-foreground hover:border-primary hover:text-primary transition-colors"
+                    >
+                      {c.name}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </div>
           ) : (
             <>
               {/* Quick Filters Bar */}

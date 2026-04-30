@@ -341,9 +341,15 @@ export const ListingDetail = () => {
   ].filter(spec => spec.value);
 
   // WhatsApp message generator
-  const whatsappMessage = `Hi, I'm interested in your ${listing.title} on Vozila.hr`;
-  const whatsappLink = listing.contact_phone 
+  const listingUrl = typeof window !== 'undefined' ? window.location.href : '';
+  const whatsappMessage = `Pozdrav, zanima me oglas: ${listing.title}${listing.price ? ` (${listing.price.toLocaleString('hr-HR')} €)` : ''}\n${listingUrl}`;
+  const whatsappLink = listing.contact_phone
     ? `https://wa.me/${listing.contact_phone.replace(/\D/g, '')}?text=${encodeURIComponent(whatsappMessage)}`
+    : null;
+  const emailSubject = `Vozila.hr — upit za ${listing.title}`;
+  const emailBody = `Pozdrav,\n\nZanima me sljedeći oglas:\n${listing.title}${listing.price ? ` — ${listing.price.toLocaleString('hr-HR')} €` : ''}\n${listingUrl}\n\nMolim Vas dodatne informacije.\n\nHvala.`;
+  const emailLink = listing.contact_email
+    ? `mailto:${listing.contact_email}?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`
     : null;
 
   // SEO title for this listing
@@ -677,18 +683,18 @@ export const ListingDetail = () => {
       {/* MILESTONE 6: Similar Vehicles */}
       <SimilarVehicles listing={listing} />
 
-      {/* Mobile Sticky Contact Bar */}
+      {/* Mobile Sticky Contact Bar — theme-aware, one-tap to call/whatsapp/email */}
       {listing.status === 'active' && (
-        <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-black border-t border-white/10 px-4 py-3 z-50 flex items-center justify-between gap-3">
+        <div className="lg:hidden fixed bottom-[60px] left-0 right-0 bg-background border-t border-border px-4 py-3 z-50 flex items-center justify-between gap-3 safe-area-pb">
           <div className="flex-1 min-w-0">
-            <p className="text-[10px] font-light uppercase tracking-widest text-white/40 truncate">
+            <p className="text-[10px] font-light uppercase tracking-widest text-muted-foreground truncate">
               {listing.title}
             </p>
-            <p className="text-sm font-light text-white truncate">
-              {listing.price === 0 ? 'Na upit' : `${listing.price.toLocaleString()} ${listing.currency || '€'}`}
+            <p className="text-sm font-light text-foreground truncate tabular-nums">
+              {listing.price === 0 ? 'Na upit' : `${listing.price.toLocaleString('hr-HR')} ${listing.currency || '€'}`}
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
             {whatsappLink && (
               <a
                 href={whatsappLink}
@@ -702,23 +708,30 @@ export const ListingDetail = () => {
                       price: listing.price,
                       category: listing.categories?.slug,
                     });
-                  } catch {
-                    // Analytics not initialized yet, silently fail
-                  }
+                  } catch {}
                 }}
-                className="flex items-center justify-center gap-2 px-4 py-3 bg-green-600 text-white font-light uppercase tracking-widest text-[10px] hover:bg-green-700 transition-colors"
+                aria-label="WhatsApp"
+                className="inline-flex items-center justify-center w-11 h-11 bg-[#25D366] text-white hover:bg-[#22c55e] transition-colors"
               >
-                <MessageCircle className="w-4 h-4" strokeWidth={1.5} />
-                <span className="hidden sm:inline">WhatsApp</span>
+                <MessageCircle className="w-4 h-4" strokeWidth={1.75} />
               </a>
             )}
             {listing.contact_phone && (
               <a
                 href={`tel:${listing.contact_phone}`}
-                className="flex items-center justify-center gap-2 px-4 py-3 bg-white text-black font-light uppercase tracking-widest text-[10px] hover:bg-neutral-200 transition-colors"
+                aria-label="Nazovi"
+                className="inline-flex items-center justify-center w-11 h-11 bg-foreground text-background hover:bg-foreground/90 transition-colors"
               >
-                <Phone className="w-4 h-4" strokeWidth={1.5} />
-                <span className="hidden sm:inline">Nazovi</span>
+                <Phone className="w-4 h-4" strokeWidth={1.75} />
+              </a>
+            )}
+            {emailLink && (
+              <a
+                href={emailLink}
+                aria-label="Pošalji email"
+                className="inline-flex items-center justify-center w-11 h-11 border border-border text-foreground hover:border-primary hover:text-primary transition-colors"
+              >
+                <Mail className="w-4 h-4" strokeWidth={1.75} />
               </a>
             )}
           </div>
