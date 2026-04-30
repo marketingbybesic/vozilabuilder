@@ -197,43 +197,22 @@ export const Dashboard = () => {
           </Link>
         </div>
 
-        {/* Analytics Lite */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <div className="bg-card border border-neutral-800 rounded-lg p-6">
-            <div className="flex items-center gap-3 mb-2">
-              <TrendingUp className="w-5 h-5 text-primary" />
-              <span className="text-xs font-black uppercase tracking-widest text-neutral-400">
-                Ukupno upita
-              </span>
-            </div>
-            <p className="text-3xl font-black text-foreground">
-              {totalLeads}
-            </p>
-          </div>
-          
-          <div className="bg-card border border-neutral-800 rounded-lg p-6">
-            <div className="flex items-center gap-3 mb-2">
-              <CarIcon className="w-5 h-5 text-primary" />
-              <span className="text-xs font-black uppercase tracking-widest text-neutral-400">
-                Ukupno oglasa
-              </span>
-            </div>
-            <p className="text-3xl font-black text-foreground">
-              {listings.length}
-            </p>
-          </div>
-          
-          <div className="bg-card border border-neutral-800 rounded-lg p-6">
-            <div className="flex items-center gap-3 mb-2">
-              <Eye className="w-5 h-5 text-primary" />
-              <span className="text-xs font-black uppercase tracking-widest text-neutral-400">
-                Ukupno pregleda
-              </span>
-            </div>
-            <p className="text-3xl font-black text-foreground">
-              {listings.reduce((sum, listing) => sum + (listing.views_count || 0), 0)}
-            </p>
-          </div>
+        {/* Analytics — 4 editorial stat cards */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-10">
+          <StatCard label="Aktivnih oglasa" value={String(listings.filter(l => l.status === 'active').length)} icon={CarIcon} />
+          <StatCard label="Ukupno pregleda" value={listings.reduce((s, l) => s + (l.views_count || 0), 0).toLocaleString('hr-HR')} icon={Eye} />
+          <StatCard label="Ukupno upita" value={String(totalLeads)} icon={TrendingUp} />
+          <StatCard
+            label="Prosječni Match Score"
+            value={(() => {
+              const active = listings.filter(l => l.status === 'active');
+              if (active.length === 0) return '—';
+              const avg = active.reduce((s, l) => s + matchScore(l as any).total, 0) / active.length;
+              return `${Math.round(avg)}/100`;
+            })()}
+            icon={ToggleRight}
+            accent
+          />
         </div>
 
         {/* Empty State */}
@@ -379,3 +358,17 @@ export const Dashboard = () => {
     </div>
   );
 };
+
+const StatCard = ({ label, value, icon: Icon, accent = false }: { label: string; value: string; icon: any; accent?: boolean }) => (
+  <div className={`p-5 sm:p-6 border ${accent ? 'border-primary/40 bg-primary/5' : 'border-border bg-muted/20'}`}>
+    <div className="flex items-center gap-2 mb-3">
+      <Icon className={`w-3.5 h-3.5 ${accent ? 'text-primary' : 'text-muted-foreground'}`} strokeWidth={1.5} aria-hidden="true" />
+      <span className="text-[9px] font-light uppercase tracking-[0.3em] text-muted-foreground">
+        {label}
+      </span>
+    </div>
+    <p className={`text-2xl sm:text-3xl font-light tabular-nums ${accent ? 'text-primary' : 'text-foreground'}`}>
+      {value}
+    </p>
+  </div>
+);

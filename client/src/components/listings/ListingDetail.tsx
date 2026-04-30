@@ -103,6 +103,9 @@ const FUEL_COSTS: Record<string, { litres: number; pricePerUnit: number; unit: s
 import { FuelCostCard as FuelCostCardImpl } from './FuelCostCard';
 import { MatchScoreCard } from './MatchScoreCard';
 import { PriceIntel } from './PriceIntel';
+import { LoanCalculator } from './LoanCalculator';
+import { ShareButtons } from './ShareButtons';
+import { PriceWatchButton } from './PriceWatchButton';
 const CostPer100km = ({ attributes }: { attributes: Record<string, any> }) => (
   <FuelCostCardImpl attributes={attributes} />
 );
@@ -597,8 +600,14 @@ export const ListingDetail = () => {
             {/* Price intel — Where this price sits vs comparable listings */}
             <PriceIntel listing={listing} />
 
+            {/* Loan calculator — interactive, free buyer tool */}
+            <LoanCalculator price={listing.price} currency={listing.currency || 'EUR'} />
+
             {/* Match Score breakdown — what raised the score, and what would push to 100 */}
             <MatchScoreCard listing={listing} />
+
+            {/* Share — Web Share API + per-channel fallbacks */}
+            <ShareButtons title={listing.title} url={listingUrl} />
           </div>
 
           {/* Right: Sticky Info Panel */}
@@ -618,10 +627,21 @@ export const ListingDetail = () => {
                 </div>
 
                 {/* Price Ribbon */}
-                <div className={`flex items-center gap-2 px-4 py-2 ${priceRibbon.color} text-white rounded-none mb-8`}>
+                <div className={`flex items-center gap-2 px-4 py-2 ${priceRibbon.color} text-white rounded-none mb-5`}>
                   <RibbonIcon className="w-4 h-4" strokeWidth={1.5} />
                   <span className="text-xs font-light uppercase tracking-widest">{priceRibbon.text}</span>
                 </div>
+
+                {/* Price-watch toggle — drives loss-aversion return visits */}
+                {listing.price > 0 && (
+                  <div className="mb-8">
+                    <PriceWatchButton
+                      listingId={listing.id}
+                      currentPrice={listing.price}
+                      currency={listing.currency || 'EUR'}
+                    />
+                  </div>
+                )}
 
                 {/* Location */}
                 {listing.location && (

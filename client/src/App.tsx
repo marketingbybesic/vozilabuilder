@@ -23,6 +23,7 @@ import { Terms } from './pages/Terms';
 import { Pricing } from './pages/Pricing';
 import { AdminDashboard } from './components/admin/AdminDashboard';
 import { DealerProfile } from './pages/DealerProfile';
+import { NotFound } from './pages/NotFound';
 
 function App() {
   useEffect(() => {
@@ -59,6 +60,7 @@ function App() {
                 {/* /pretraga — general search with nuqs URL state */}
                 <Route path="/pretraga" element={<ListingFeed />} />
                 <Route path="/:categorySlug" element={<ListingFeed />} />
+                <Route path="*" element={<NotFound />} />
               </Routes>
             </main>
 
