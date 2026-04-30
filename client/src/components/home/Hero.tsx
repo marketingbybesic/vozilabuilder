@@ -51,7 +51,7 @@ export const Hero = () => {
   const slideTotal = String(SLIDES.length).padStart(2, '0');
 
   return (
-    <section className="relative w-full bg-black text-white overflow-hidden z-0">
+    <section className="relative w-full bg-background text-foreground overflow-hidden z-0">
       {/* Two-column on desktop, photograph stacks above index on mobile */}
       <div className="grid grid-cols-1 lg:grid-cols-12 min-h-[640px] lg:min-h-[760px]">
         {/* RIGHT: rotating full-bleed photograph (mobile: top) */}
@@ -99,14 +99,14 @@ export const Hero = () => {
           {/* Top row: index counter + brand mark */}
           <div className="flex items-start justify-between">
             <div className="flex items-baseline gap-2 font-light tabular-nums">
-              <span className="text-xs uppercase tracking-[0.3em] text-white/40">
+              <span className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
                 {slideIndex}
               </span>
-              <span className="text-xs uppercase tracking-[0.3em] text-white/20">
+              <span className="text-xs uppercase tracking-[0.3em] text-muted-foreground/60">
                 / {slideTotal}
               </span>
             </div>
-            <span className="text-[10px] font-light uppercase tracking-[0.3em] text-white/40">
+            <span className="text-[10px] font-light uppercase tracking-[0.3em] text-muted-foreground">
               Premium marketplace
             </span>
           </div>
@@ -118,7 +118,7 @@ export const Hero = () => {
             </p>
             <h1
               key={activeSlide}
-              className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-light uppercase tracking-tight leading-[1.05] text-white animate-in fade-in slide-in-from-bottom-2 duration-700"
+              className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-light uppercase tracking-tight leading-[1.05] text-foreground animate-in fade-in slide-in-from-bottom-2 duration-700"
             >
               {SLIDES[activeSlide].label}
             </h1>
@@ -128,7 +128,7 @@ export const Hero = () => {
               className="mt-8 h-px bg-primary origin-left animate-in slide-in-from-left fade-in duration-1000"
               style={{ width: '88px' }}
             />
-            <p className="mt-6 text-xs font-light uppercase tracking-[0.25em] text-white/50 max-w-md">
+            <p className="mt-6 text-xs font-light uppercase tracking-[0.25em] text-muted-foreground max-w-md">
               {displayText || 'Pretražite po marki, modelu ili gradu'}
               <span className="ml-0.5 text-primary animate-pulse">|</span>
             </p>
@@ -139,7 +139,7 @@ export const Hero = () => {
             {/* Single underlined search line */}
             <div className="relative">
               <Search
-                className="absolute left-0 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40"
+                className="absolute left-0 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground"
                 strokeWidth={1.5}
                 aria-hidden="true"
               />
@@ -150,12 +150,12 @@ export const Hero = () => {
                 onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                 placeholder="Marka, model, lokacija"
                 aria-label="Pretraga vozila"
-                className="w-full h-12 pl-7 pr-20 bg-transparent border-0 border-b border-white/20 text-white placeholder-white/30 text-sm font-light tracking-widest focus:outline-none focus:border-primary transition-colors"
+                className="w-full h-12 pl-7 pr-20 bg-transparent border-0 border-b border-border text-foreground placeholder:text-muted-foreground text-sm font-light tracking-widest focus:outline-none focus:border-primary transition-colors"
               />
               <button
                 onClick={handleSearch}
                 aria-label="Pretraži"
-                className="absolute right-0 top-1/2 -translate-y-1/2 flex items-center gap-1 text-[10px] font-light uppercase tracking-[0.25em] text-white/60 hover:text-primary focus:outline-none focus-visible:ring-1 focus-visible:ring-primary transition-colors"
+                className="absolute right-0 top-1/2 -translate-y-1/2 flex items-center gap-1 text-[10px] font-light uppercase tracking-[0.25em] text-muted-foreground hover:text-primary focus:outline-none focus-visible:ring-1 focus-visible:ring-primary transition-colors"
               >
                 Traži <ArrowRight className="w-3 h-3" strokeWidth={1.5} />
               </button>
@@ -166,10 +166,10 @@ export const Hero = () => {
               {[
                 { label: 'Cijena od (€)', value: priceMin, set: setPriceMin, ph: '0' },
                 { label: 'Cijena do (€)', value: priceMax, set: setPriceMax, ph: '∞' },
-                { label: 'Kilometri do',       value: kmMax,    set: setKmMax,    ph: '∞' },
+                { label: 'Kilometri do',  value: kmMax,    set: setKmMax,    ph: '∞' },
               ].map((f) => (
                 <div key={f.label}>
-                  <label className="block text-[9px] font-light uppercase tracking-[0.25em] text-white/40 mb-2">
+                  <label className="block text-[9px] font-light uppercase tracking-[0.25em] text-muted-foreground mb-2">
                     {f.label}
                   </label>
                   <input
@@ -179,7 +179,7 @@ export const Hero = () => {
                     onChange={(e) => f.set(e.target.value)}
                     placeholder={f.ph}
                     aria-label={f.label}
-                    className="w-full h-9 bg-transparent border-0 border-b border-white/15 text-white placeholder-white/25 text-sm font-light tabular-nums focus:outline-none focus:border-primary transition-colors"
+                    className="w-full h-9 bg-transparent border-0 border-b border-border text-foreground placeholder:text-muted-foreground/60 text-sm font-light tabular-nums focus:outline-none focus:border-primary transition-colors"
                   />
                 </div>
               ))}
@@ -187,7 +187,7 @@ export const Hero = () => {
 
             <button
               onClick={() => setSearchModalOpen(true)}
-              className="group inline-flex items-center gap-2 text-[10px] font-light uppercase tracking-[0.3em] text-white/60 hover:text-primary focus:outline-none focus-visible:ring-1 focus-visible:ring-primary transition-colors"
+              className="group inline-flex items-center gap-2 text-[10px] font-light uppercase tracking-[0.3em] text-muted-foreground hover:text-primary focus:outline-none focus-visible:ring-1 focus-visible:ring-primary transition-colors"
             >
               <SlidersHorizontal className="w-3.5 h-3.5" strokeWidth={1.5} />
               Detaljna pretraga
@@ -198,17 +198,17 @@ export const Hero = () => {
           {/* Quick category typographic stack */}
           <div className="mt-10 lg:mt-0 flex flex-wrap items-center gap-x-6 gap-y-3">
             {[
-              { name: 'Automobili',       slug: 'osobni-automobili' },
-              { name: 'Motocikli',        slug: 'motocikli' },
-              { name: 'Slobodno vrijeme', slug: 'slobodno-vrijeme' },
-              { name: 'Gospodarska',      slug: 'gospodarska-vozila' },
+              { name: 'Automobili', slug: 'osobni-automobili' },
+              { name: 'Motocikli', slug: 'motocikli' },
+              { name: 'Kombiji',   slug: 'kombiji-laki-teretni' },
+              { name: 'Plovila',   slug: 'plovila-nautika' },
             ].map((cat) => (
               <Link
                 key={cat.slug}
                 to={`/${cat.slug}`}
-                className="group inline-flex items-center gap-2 text-[10px] font-light uppercase tracking-[0.3em] text-white/40 hover:text-white focus:outline-none focus-visible:ring-1 focus-visible:ring-primary transition-colors"
+                className="group inline-flex items-center gap-2 text-[10px] font-light uppercase tracking-[0.3em] text-muted-foreground hover:text-foreground focus:outline-none focus-visible:ring-1 focus-visible:ring-primary transition-colors"
               >
-                <span className="block h-px w-3 bg-white/30 group-hover:w-6 group-hover:bg-primary transition-all duration-500" />
+                <span className="block h-px w-3 bg-border group-hover:w-6 group-hover:bg-primary transition-all duration-500" />
                 {cat.name}
               </Link>
             ))}

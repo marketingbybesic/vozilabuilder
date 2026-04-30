@@ -90,32 +90,21 @@ export const navigationMenu: NavigationMenuItem[] = [
     ]
   },
   {
-    slug: 'gradevinski-strojevi', name: 'Građevinski strojevi', icon: ConstructionIcon,
-    sub: [
-      { name: 'Bageri', slug: 'bageri', icon: ConstructionIcon },
-      { name: 'Utovarivači', slug: 'utovarivaci', icon: Box },
-      { name: 'Valjci', slug: 'valjci', icon: Cog },
-      { name: 'Dizalice', slug: 'dizalice', icon: Factory },
-      { name: 'Viličari', slug: 'viljuskari', icon: Box },
-      { name: 'Mikseri i pumpe', slug: 'miksere-pumpe', icon: PaintBucket },
-      { name: 'Kompresori', slug: 'kompresori', icon: Wind },
-      { name: 'Generatori', slug: 'generatori', icon: PlugZap },
-      { name: 'Damperi', slug: 'dumperi', icon: Truck },
-      { name: 'Ostali građevinski', slug: 'ostali-gradevinski', icon: Hammer }
-    ]
-  },
-  {
-    slug: 'poljoprivredni-strojevi', name: 'Poljoprivredni strojevi', icon: Tractor,
+    slug: 'strojevi', name: 'Strojevi', icon: Tractor,
     sub: [
       { name: 'Traktori', slug: 'traktori', icon: Tractor },
       { name: 'Kombajni', slug: 'kombajni', icon: Wheat },
+      { name: 'Bageri', slug: 'bageri', icon: ConstructionIcon },
+      { name: 'Utovarivači', slug: 'utovarivaci', icon: Box },
+      { name: 'Viličari', slug: 'viljuskari', icon: Box },
+      { name: 'Dizalice', slug: 'dizalice', icon: Factory },
+      { name: 'Valjci', slug: 'valjci', icon: Cog },
       { name: 'Priključni strojevi', slug: 'prikljucni-strojevi', icon: Settings2 },
-      { name: 'Prskalice', slug: 'prskalice', icon: Droplet },
-      { name: 'Plugovi', slug: 'pluzevi', icon: Sprout },
-      { name: 'Sjetva i žetva', slug: 'sjetva-zetva', icon: Wheat },
+      { name: 'Mikseri i pumpe', slug: 'miksere-pumpe', icon: PaintBucket },
+      { name: 'Generatori', slug: 'generatori', icon: PlugZap },
+      { name: 'Damperi', slug: 'dumperi', icon: Truck },
       { name: 'Vinogradarski', slug: 'vinogradarski', icon: Trees },
-      { name: 'Stočarska oprema', slug: 'stocarska-oprema', icon: ShieldAlert },
-      { name: 'Ostali poljoprivredni', slug: 'ostali-poljoprivredni', icon: Wrench }
+      { name: 'Ostali strojevi', slug: 'ostali-strojevi', icon: Hammer }
     ]
   },
   {

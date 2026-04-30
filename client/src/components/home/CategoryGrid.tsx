@@ -9,25 +9,19 @@ const categoryImages: Record<string, string> = {
   'bicikli-romobili': '/img/categories/bicycles.jpg',
   'kombiji-laki-teretni': '/img/categories/light-commercial.jpg',
   'kamioni-teretna': '/img/categories/heavy-trucks.jpg',
-  'gradevinski-strojevi': '/img/categories/construction.jpg',
-  'poljoprivredni-strojevi': '/img/categories/agriculture.jpg',
+  'strojevi': '/img/categories/machinery.jpg',
   'kamperi-karavani': '/img/categories/campers.jpg',
   'plovila-nautika': '/img/categories/boats.jpg',
   'dijelovi-oprema': '/img/categories/parts.jpg',
   'usluge': '/img/categories/services.jpg',
-  // Legacy fallback keys retained
-  'slobodno-vrijeme': '/img/categories/leisure.jpg',
-  'gospodarska-vozila': '/img/categories/commercial.jpg',
-  'strojevi': '/img/categories/machinery.jpg',
 };
 
 // Editorial numbered ledger. Six categories rendered as full-width horizontal rows:
 // numeric index, name, drawing red hairline, and a thin photographic strip that opens
 // on hover. Not a tile grid. Photography is a column of context, not a poster.
 export const CategoryGrid = () => {
-  // Pick the first six taxonomy entries — taxonomy is the source of truth for routes.
-  // If fewer than 6 exist, the layout still works.
-  const ordered = navigationMenu.slice(0, 6);
+  // Show every top-level category — taxonomy is the source of truth for routes.
+  const ordered = navigationMenu;
 
   return (
     <section className="py-20 lg:py-28 px-6 sm:px-10 lg:px-14 max-w-[1480px] mx-auto">
