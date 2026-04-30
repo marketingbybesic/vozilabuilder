@@ -18,6 +18,7 @@ import Thumbnails from 'yet-another-react-lightbox/plugins/thumbnails';
 import 'yet-another-react-lightbox/styles.css';
 import 'yet-another-react-lightbox/plugins/thumbnails.css';
 import { onImgError, PLACEHOLDER_CAR } from '../../lib/imageFallback';
+import { pushRecent } from '../../lib/recentlyViewed';
 
 // --- MILESTONE 4: HISTORY TIMELINE ---
 
@@ -214,6 +215,13 @@ export const ListingDetail = () => {
           owner: (data as any).owner,
         };
         setListing(normalized as Listing);
+
+        // Record in recently-viewed (endowment hook on home + VDP)
+        try {
+          const imgs = (data as Listing).listing_images || [];
+          const primary = imgs.find((i: any) => i.is_primary)?.url || imgs[0]?.url;
+          pushRecent({ id, title: (data as Listing).title, price: (data as Listing).price ?? 0, imageUrl: primary });
+        } catch {}
 
         // Track view_listing event
         try {

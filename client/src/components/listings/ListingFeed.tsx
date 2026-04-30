@@ -13,6 +13,7 @@ import { globalFilters, categoryFilters, FilterDefinition } from '../../config/f
 import { Listing } from '../../types';
 import { Helmet } from 'react-helmet-async';
 import { onImgError } from '../../lib/imageFallback';
+import { matchScore } from '../../lib/matchScore';
 
 const ITEMS_PER_PAGE = 9;
 
@@ -250,9 +251,24 @@ export const ListingCard = ({ car }: { car: Listing }) => {
           )}
         </div>
 
-        {/* View count — top-right, only on hover, hairline */}
+        {/* Match Score pill — top-right, always visible. Quality signal at-a-glance. */}
+        {(() => {
+          const ms = matchScore(car);
+          const tone = ms.band === 'Premium' ? 'bg-primary text-primary-foreground' : ms.band === 'Solid' ? 'bg-foreground/85 text-background' : 'bg-black/65 text-white/80';
+          return (
+            <span
+              title={ms.reasons.length ? ms.reasons.join(' · ') : 'Osnovni oglas'}
+              className={`absolute top-3 right-3 inline-flex items-baseline gap-1 px-2 py-1 text-[10px] font-light uppercase tracking-[0.2em] tabular-nums ${tone}`}
+            >
+              <span className="font-medium tabular-nums">{ms.total}</span>
+              <span className="opacity-60">/100</span>
+            </span>
+          );
+        })()}
+
+        {/* View count — bottom-right, only on hover */}
         {isHovered && (car.views_count ?? 0) > 0 && (
-          <span className="absolute top-3 right-3 inline-flex items-center gap-1.5 text-[9px] font-light uppercase tracking-[0.25em] text-white/80">
+          <span className="absolute bottom-3 right-3 inline-flex items-center gap-1.5 text-[9px] font-light uppercase tracking-[0.25em] text-white/80">
             <Eye className="w-3 h-3" strokeWidth={1.5} aria-hidden="true" />
             {(car.views_count ?? 0).toLocaleString('hr-HR')}
           </span>
@@ -726,6 +742,29 @@ export const ListingFeed = () => {
               {opt.label}
             </button>
           ))}
+        </div>
+      );
+    }
+    if (filter.type === 'boolean') {
+      const v = legacyFilters[filter.id];
+      return (
+        <div className="flex gap-2">
+          <button
+            onClick={() => setFilter(filter.id, v === 'true' ? '' : 'true')}
+            className={`flex-1 px-3 py-2 rounded-none text-xs font-light uppercase tracking-widest border transition-all duration-200 ${
+              v === 'true' ? 'bg-primary text-primary-foreground border-primary' : 'bg-transparent border-border/60 text-muted-foreground hover:border-primary/50'
+            }`}
+          >
+            Da
+          </button>
+          <button
+            onClick={() => setFilter(filter.id, v === 'false' ? '' : 'false')}
+            className={`flex-1 px-3 py-2 rounded-none text-xs font-light uppercase tracking-widest border transition-all duration-200 ${
+              v === 'false' ? 'bg-foreground text-background border-foreground' : 'bg-transparent border-border/60 text-muted-foreground hover:border-primary/50'
+            }`}
+          >
+            Ne
+          </button>
         </div>
       );
     }

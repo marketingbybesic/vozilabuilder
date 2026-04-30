@@ -6,6 +6,7 @@ import { Listing } from '../types';
 import { Hero } from '../components/home/Hero';
 import { CategoryGrid } from '../components/home/CategoryGrid';
 import { NoviOglasiCarousel } from '../components/home/NoviOglasiCarousel';
+import { RecentlyViewed } from '../components/home/RecentlyViewed';
 import { ListingCard as FeedListingCard } from '../components/listings/ListingFeed';
 
 export const Home = () => {
@@ -49,6 +50,9 @@ export const Home = () => {
     <div className="min-h-screen bg-background text-foreground">
       {/* Hero Component */}
       <Hero />
+
+      {/* Recently viewed (only renders if user has history) */}
+      <RecentlyViewed />
 
       {/* Category Grid */}
       <CategoryGrid />
