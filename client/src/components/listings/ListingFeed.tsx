@@ -20,14 +20,29 @@ import { countNewSince, markSeen } from '../../lib/freshness';
 
 const ITEMS_PER_PAGE = 9;
 
-// --- MAKES LIST ---
-const MAKES = [
-  'BMW', 'Audi', 'Mercedes', 'Volkswagen', 'Toyota', 'Honda', 'Ford', 'Opel',
-  'Škoda', 'Hyundai', 'Kia', 'Renault', 'Peugeot', 'Citroën', 'Fiat', 'Seat',
-  'Volvo', 'Porsche', 'Mazda', 'Nissan', 'Mitsubishi', 'Subaru', 'Jeep', 'Land Rover',
-  'Dacia', 'Alfa Romeo', 'Lancia', 'Suzuki', 'Lexus', 'Infiniti', 'Jaguar', 'Mini',
-  'Chrysler', 'Dodge', 'Tesla', 'Rivian'
-];
+import {
+  CAR_MAKES, CAR_MODELS,
+  MOTORCYCLE_MAKES, MOTORCYCLE_MODELS,
+  TRUCK_MAKES, TRUCK_MODELS,
+  TRACTOR_MAKES, TRACTOR_MODELS,
+} from '../../config/vehicleData';
+
+// Per-category make+model catalogs. Falls back to CAR_MAKES for parts
+// and unknown categories.
+const CATALOG: Record<string, { makes: string[]; models: Record<string, string[]> }> = {
+  'osobni-automobili':    { makes: CAR_MAKES,        models: CAR_MODELS },
+  'kombiji-laki-teretni': { makes: CAR_MAKES,        models: CAR_MODELS },
+  'kamperi-karavani':     { makes: CAR_MAKES,        models: CAR_MODELS },
+  'motocikli':            { makes: MOTORCYCLE_MAKES, models: MOTORCYCLE_MODELS },
+  'bicikli-romobili':     { makes: MOTORCYCLE_MAKES, models: MOTORCYCLE_MODELS },
+  'kamioni-teretna':      { makes: TRUCK_MAKES,      models: TRUCK_MODELS },
+  'strojevi':             { makes: TRACTOR_MAKES,    models: TRACTOR_MODELS },
+  'plovila-nautika':      { makes: CAR_MAKES,        models: CAR_MODELS }, // boat brands rare in dataset; use car list as graceful fallback
+  'dijelovi-oprema':      { makes: CAR_MAKES,        models: CAR_MODELS },
+  'usluge':               { makes: [], models: {} }, // services don't need make/model
+};
+
+const MAKES = CAR_MAKES; // legacy fallback for code paths without categorySlug
 
 // --- WEIGHTED SCORE — sort key for "Prema preporuci" ---
 //
@@ -389,15 +404,22 @@ const MakeModelFilter = ({
   selectedModel,
   onMakeChange,
   onModelChange,
+  categorySlug,
 }: {
   selectedMake: string;
   selectedModel: string;
   onMakeChange: (make: string) => void;
   onModelChange: (model: string) => void;
+  categorySlug?: string | null;
 }) => {
   const [models, setModels] = useState<ModelOption[]>([]);
   const [loadingModels, setLoadingModels] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Resolve catalog for this category — falls back to CAR_MODELS
+  const cat = (categorySlug && CATALOG[categorySlug]) || CATALOG['osobni-automobili'];
+  const makesList = cat.makes;
+  const curatedModels = (selectedMake && cat.models[selectedMake]) || [];
 
   useEffect(() => {
     if (!selectedMake) {
@@ -420,18 +442,27 @@ const MakeModelFilter = ({
         (data || []).forEach((row: any) => {
           const attrs = typeof row.attributes === 'string' ? JSON.parse(row.attributes) : row.attributes;
           const model = attrs?.model;
-          if (model) {
-            modelCounts[model] = (modelCounts[model] || 0) + 1;
-          }
+          if (model) modelCounts[model] = (modelCounts[model] || 0) + 1;
         });
 
-        const sorted = Object.entries(modelCounts)
-          .map(([value, count]) => ({ value, count }))
-          .sort((a, b) => b.count - a.count);
-
-        setModels(sorted);
+        // Merge: every curated model first, with DB count if present, then any
+        // DB-only models (in case the seed had unusual model names)
+        const merged: ModelOption[] = [];
+        const seen = new Set<string>();
+        for (const m of curatedModels) {
+          merged.push({ value: m, count: modelCounts[m] || 0 });
+          seen.add(m);
+        }
+        for (const [m, count] of Object.entries(modelCounts)) {
+          if (seen.has(m)) continue;
+          merged.push({ value: m, count });
+        }
+        // Sort: DB-counted first (desc), then curated alphabetically
+        merged.sort((a, b) => (b.count - a.count) || a.value.localeCompare(b.value));
+        setModels(merged);
       } catch {
-        setModels([]);
+        // DB failed — at least surface the curated list
+        setModels(curatedModels.map((m) => ({ value: m, count: 0 })));
       } finally {
         setLoadingModels(false);
       }
@@ -440,7 +471,7 @@ const MakeModelFilter = ({
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
-  }, [selectedMake]);
+  }, [selectedMake, categorySlug]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="space-y-4">
@@ -456,7 +487,7 @@ const MakeModelFilter = ({
           className="w-full bg-background/50 border border-border/60 rounded-none px-3 py-2 text-xs focus:ring-1 focus:ring-primary appearance-none outline-none transition-all"
         >
           <option value="">Sve marke</option>
-          {MAKES.map(make => (
+          {makesList.map(make => (
             <option key={make} value={make}>{make}</option>
           ))}
         </select>
@@ -868,6 +899,7 @@ export const ListingFeed = () => {
                     selectedModel={queryState.model}
                     onMakeChange={(make) => setQueryState({ make: make || null, model: null } as any)}
                     onModelChange={(model) => setQueryState({ model: model || null } as any)}
+                    categorySlug={categorySlug}
                   />
                 </Accordion>
 
