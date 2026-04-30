@@ -50,14 +50,15 @@ export const Footer = () => {
           <FooterColumn title="Za kupce">
             <FooterLink to="/favoriti">Favoriti</FooterLink>
             <FooterLink to="/pretraga">Napredna pretraga</FooterLink>
-            <FooterLink to="/za-partnere">Pretplate i paketi</FooterLink>
+            <FooterLink to="/saloni">Aktivni saloni</FooterLink>
+            <FooterLink to="/o-nama">O nama</FooterLink>
             <FooterLink to="/kontakt">Pomoć</FooterLink>
           </FooterColumn>
 
           <FooterColumn title="Za prodavače">
             <FooterLink to="/predaj-oglas">Objavi oglas</FooterLink>
             <FooterLink to="/za-partnere">Dealer paketi</FooterLink>
-            <FooterLink to="/za-partnere">Suradnja</FooterLink>
+            <FooterLink to="/saloni">Pregled salona</FooterLink>
             <FooterLink to="/dashboard">Dashboard</FooterLink>
           </FooterColumn>
         </div>

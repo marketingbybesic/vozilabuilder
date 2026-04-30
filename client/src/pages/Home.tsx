@@ -7,6 +7,7 @@ import { Hero } from '../components/home/Hero';
 import { CategoryGrid } from '../components/home/CategoryGrid';
 import { NoviOglasiCarousel } from '../components/home/NoviOglasiCarousel';
 import { RecentlyViewed } from '../components/home/RecentlyViewed';
+import { TrendingSearches } from '../components/home/TrendingSearches';
 import { ListingCard as FeedListingCard } from '../components/listings/ListingFeed';
 
 export const Home = () => {
@@ -56,6 +57,9 @@ export const Home = () => {
 
       {/* Category Grid */}
       <CategoryGrid />
+
+      {/* Trending searches — popular make/model queries from live data */}
+      <TrendingSearches />
 
       {/* IZDVOJENI OGLASI - Featured Ads */}
       <section className="py-16 px-4 max-w-7xl mx-auto">

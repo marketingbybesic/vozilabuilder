@@ -800,15 +800,33 @@ export const ListingDetail = () => {
         </div>
       )}
 
-      {/* Premium Lightbox - Pitch Black Backdrop */}
+      {/* Premium Lightbox - Pitch Black Backdrop, keyboard nav, anti-context-menu */}
       <Lightbox
         open={lightboxOpen}
         close={() => setLightboxOpen(false)}
         slides={lightboxSlides}
         index={lightboxIndex}
         plugins={[Zoom, Thumbnails]}
+        controller={{ closeOnBackdropClick: true, closeOnPullDown: true }}
+        carousel={{ finite: false, preload: 2 }}
+        animation={{ swipe: 350, fade: 250 }}
+        zoom={{ maxZoomPixelRatio: 3, scrollToZoom: true, doubleTapDelay: 300 }}
+        thumbnails={{ position: 'bottom', width: 96, height: 64, gap: 8 }}
+        render={{
+          slide: ({ slide }) => (
+            <img
+              src={(slide as any).src}
+              alt=""
+              draggable={false}
+              onContextMenu={(e) => e.preventDefault()}
+              style={{ maxWidth: '100%', maxHeight: '100%', userSelect: 'none' }}
+            />
+          ),
+        }}
         styles={{
           container: { backgroundColor: '#000000' },
+          thumbnailsContainer: { backgroundColor: '#000000' },
+          thumbnail: { backgroundColor: '#111' },
         }}
       />
     </div>
