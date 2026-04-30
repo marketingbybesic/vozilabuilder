@@ -146,7 +146,7 @@ export const Hero = () => {
             return (
               <Link
                 key={cat}
-                to={`/?category=${slugMap[cat]}`}
+                to={`/${slugMap[cat]}`}
                 className="text-[10px] font-light text-white/30 uppercase tracking-widest hover:text-white/70 transition-colors duration-300"
               >
                 {cat}

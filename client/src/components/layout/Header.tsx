@@ -15,8 +15,10 @@ export const Header = () => {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [authUser, setAuthUser] = useState<any>(null);
   const location = useLocation();
-  const searchParams = new URLSearchParams(location.search);
-  const activeCategory = searchParams.get('category');
+  // Active category derived from URL path (e.g. /osobni-automobili -> osobni-automobili)
+  const activeCategory = location.pathname.startsWith('/')
+    ? location.pathname.split('/').filter(Boolean)[0] ?? null
+    : null;
 
   useEffect(() => {
     const isDarkMode = document.documentElement.classList.contains('dark');
@@ -157,14 +159,14 @@ export const Header = () => {
                     <ChevronDown className="h-3 w-3 transition-transform duration-300 group-data-[state=open]:rotate-180" strokeWidth={1.5} />
                   </NavigationMenu.Trigger>
                   <NavigationMenu.Content className="absolute top-full left-0 mt-2 min-w-[320px] p-3 z-[60] bg-background border border-border shadow-2xl">
-                    <Link to={`/?category=${category.slug}`} className="block px-3 py-2 text-xs font-light uppercase tracking-widest text-muted-foreground hover:bg-muted hover:text-foreground transition-all duration-200 mb-1">Prikaži sve: {category.name}</Link>
+                    <Link to={`/${category.slug}`} className="block px-3 py-2 text-xs font-light uppercase tracking-widest text-muted-foreground hover:bg-muted hover:text-foreground transition-all duration-200 mb-1">Prikaži sve: {category.name}</Link>
                     <div className="border-t border-border my-1" />
                     <ul className="flex flex-col gap-0">
                       {category.sub.map((subcat) => {
                         const SubIcon = subcat.icon;
                         return (
                           <li key={subcat.slug}>
-                            <Link to={`/?category=${category.slug}&subcategory=${subcat.slug}`} className="flex items-center justify-between px-3 py-2 text-xs font-light text-muted-foreground hover:text-foreground hover:bg-muted transition-all duration-200 group">
+                            <Link to={`/${category.slug}?sub=${subcat.slug}`} className="flex items-center justify-between px-3 py-2 text-xs font-light text-muted-foreground hover:text-foreground hover:bg-muted transition-all duration-200 group">
                               <div className="flex items-center gap-2">
                                 {SubIcon && <SubIcon className="w-3.5 h-3.5 text-muted-foreground group-hover:text-foreground transition-colors" strokeWidth={1.5} />}
                                 <span className="uppercase tracking-widest">{subcat.name}</span>
@@ -219,7 +221,7 @@ export const Header = () => {
                     <div key={category.slug}>
                       <div className={`flex items-center justify-between px-4 py-4 border-b border-white/10 transition-all duration-200 ${isActive ? 'bg-white/5 text-white' : 'text-white/50'}`}>
                         <Link
-                          to={`/?category=${category.slug}`}
+                          to={`/${category.slug}`}
                           onClick={() => setMobileMenuOpen(false)}
                           className="flex items-center gap-3 flex-1 hover:text-white transition-colors"
                         >
@@ -260,10 +262,10 @@ export const Header = () => {
                         </button>
                       </div>
                       <nav className="flex-1 overflow-y-auto px-4 py-4">
-                        <Link to={`/?category=${cat.slug}`} onClick={() => setMobileMenuOpen(false)} className="block px-4 py-3 text-sm font-light uppercase tracking-widest text-white/50 hover:bg-white/5 hover:text-white transition-all duration-200">{cat.name}</Link>
+                        <Link to={`/${cat.slug}`} onClick={() => setMobileMenuOpen(false)} className="block px-4 py-3 text-sm font-light uppercase tracking-widest text-white/50 hover:bg-white/5 hover:text-white transition-all duration-200">{cat.name}</Link>
                         <div className="border-t border-white/10 my-1" />
                         {cat.sub.map((subcat) => (
-                          <Link key={subcat.slug} to={`/?category=${cat.slug}&subcategory=${subcat.slug}`} onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 text-sm font-light text-white/50 hover:text-white hover:bg-white/5 transition-all duration-200">
+                          <Link key={subcat.slug} to={`/${cat.slug}?sub=${subcat.slug}`} onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 text-sm font-light text-white/50 hover:text-white hover:bg-white/5 transition-all duration-200">
                             {subcat.icon && <subcat.icon className="h-4 w-4 text-white/40" strokeWidth={1.5} />}
                             <span className="uppercase tracking-widest">{subcat.name}</span>
                           </Link>

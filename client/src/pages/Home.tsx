@@ -68,7 +68,7 @@ export const Home = () => {
             </div>
           </div>
           <Link
-            to="/?featured=true"
+            to="/pretraga?featured=true"
             className="text-xs font-light text-primary hover:text-primary/80 transition-colors duration-200 uppercase tracking-widest flex items-center gap-2"
           >
             Vidi sve
@@ -85,9 +85,9 @@ export const Home = () => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
             {featuredListings.map((listing) => (
-              <div key={listing.id} className="border border-primary/30 overflow-hidden">
+              <Link key={listing.id} to={`/listing/${listing.id}`} className="border border-primary/30 overflow-hidden block">
                 <FeedListingCard car={listing} />
-              </div>
+              </Link>
             ))}
           </div>
         )}
@@ -116,7 +116,7 @@ export const Home = () => {
             </div>
           </div>
           <Link
-            to="/?sortBy=views"
+            to="/pretraga?sort=newest"
             className="text-xs font-light text-primary hover:text-primary/80 transition-colors duration-200 uppercase tracking-widest flex items-center gap-2"
           >
             Vidi sve
@@ -133,7 +133,9 @@ export const Home = () => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
             {trendingListings.map((listing) => (
-              <FeedListingCard key={listing.id} car={listing} />
+              <Link key={listing.id} to={`/listing/${listing.id}`} className="block">
+                <FeedListingCard car={listing} />
+              </Link>
             ))}
           </div>
         )}

@@ -29,7 +29,7 @@ export const CategoryGrid = () => {
           return (
             <Link
               key={category.slug}
-              to={`/?category=${category.slug}`}
+              to={`/${category.slug}`}
               className="group relative aspect-[4/3] overflow-hidden border border-white/10"
             >
               {/* Background Image */}
