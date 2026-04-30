@@ -22,6 +22,7 @@ import { Privacy } from './pages/Privacy';
 import { Terms } from './pages/Terms';
 import { Pricing } from './pages/Pricing';
 import { AdminDashboard } from './components/admin/AdminDashboard';
+import { DealerProfile } from './pages/DealerProfile';
 
 function App() {
   useEffect(() => {
@@ -54,6 +55,7 @@ function App() {
                 <Route path="/uvjeti-koristenja" element={<Terms />} />
                 <Route path="/za-partnere" element={<Pricing />} />
                 <Route path="/admin" element={<AdminDashboard />} />
+                <Route path="/saloni/:dealerSlug" element={<DealerProfile />} />
                 {/* /pretraga — general search with nuqs URL state */}
                 <Route path="/pretraga" element={<ListingFeed />} />
                 <Route path="/:categorySlug" element={<ListingFeed />} />

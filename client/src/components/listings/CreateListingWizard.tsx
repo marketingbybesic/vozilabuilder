@@ -13,6 +13,7 @@ import { categoryFilters } from '../../config/filters';
 import { VinQuickFill } from './VinQuickFill';
 import type { VinResult } from '../../lib/vinDecoder';
 import { AiCopywriterButton } from './AiCopywriterButton';
+import { PhotoQualityHints } from './PhotoQualityHints';
 
 type WizardStep = 1 | 2 | 3;
 
@@ -826,6 +827,15 @@ const Step3 = ({ formData, handleFileChange, onBack }: any) => {
               ))}
             </div>
           )}
+
+          {/* Photo quality nag — actionable tips per upload */}
+          <PhotoQualityHints
+            files={[
+              ...(formData.heroImage ? [formData.heroImage] : []),
+              ...formData.galleryImages,
+            ]}
+            label="Kvaliteta fotografija"
+          />
         </div>
       </div>
 

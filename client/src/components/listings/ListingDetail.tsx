@@ -102,6 +102,7 @@ const FUEL_COSTS: Record<string, { litres: number; pricePerUnit: number; unit: s
 // CostPer100km — superseded by ./FuelCostCard, kept as an alias for backward compat.
 import { FuelCostCard as FuelCostCardImpl } from './FuelCostCard';
 import { MatchScoreCard } from './MatchScoreCard';
+import { PriceIntel } from './PriceIntel';
 const CostPer100km = ({ attributes }: { attributes: Record<string, any> }) => (
   <FuelCostCardImpl attributes={attributes} />
 );
@@ -558,6 +559,9 @@ export const ListingDetail = () => {
 
             {/* MILESTONE 4: Vehicle History Timeline */}
             <VehicleHistoryTimeline attributes={attributes} />
+
+            {/* Price intel — Where this price sits vs comparable listings */}
+            <PriceIntel listing={listing} />
 
             {/* Match Score breakdown — what raised the score, and what would push to 100 */}
             <MatchScoreCard listing={listing} />
