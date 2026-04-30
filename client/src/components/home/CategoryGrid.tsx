@@ -3,22 +3,18 @@ import { ArrowUpRight } from 'lucide-react';
 import { navigationMenu } from '../../config/taxonomy';
 import { onImgError } from '../../lib/imageFallback';
 
+// Maps DB-aligned top-level slugs to local hero strips.
 const categoryImages: Record<string, string> = {
   'osobni-automobili': '/img/categories/cars.jpg',
-  'motocikli': '/img/categories/motorcycles.jpg',
-  'bicikli-romobili': '/img/categories/bicycles.jpg',
-  'kombiji-laki-teretni': '/img/categories/light-commercial.jpg',
-  'kamioni-teretna': '/img/categories/heavy-trucks.jpg',
-  'gradevinski-strojevi': '/img/categories/construction.jpg',
-  'poljoprivredni-strojevi': '/img/categories/agriculture.jpg',
-  'kamperi-karavani': '/img/categories/campers.jpg',
-  'plovila-nautika': '/img/categories/boats.jpg',
+  'motocikli-atv': '/img/categories/motorcycles.jpg',
+  'gospodarska-vozila': '/img/categories/heavy-trucks.jpg',
+  'strojevi-alati': '/img/categories/construction.jpg',
+  'kamperi': '/img/categories/campers.jpg',
+  'nautika': '/img/categories/boats.jpg',
+  'e-mobilnost': '/img/categories/bicycles.jpg',
   'dijelovi-oprema': '/img/categories/parts.jpg',
+  'najam-charter': '/img/categories/leisure.jpg',
   'usluge': '/img/categories/services.jpg',
-  // Legacy fallback keys retained
-  'slobodno-vrijeme': '/img/categories/leisure.jpg',
-  'gospodarska-vozila': '/img/categories/commercial.jpg',
-  'strojevi': '/img/categories/machinery.jpg',
 };
 
 // Editorial numbered ledger. Six categories rendered as full-width horizontal rows:

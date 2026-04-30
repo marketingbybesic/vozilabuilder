@@ -198,10 +198,10 @@ export const Hero = () => {
           {/* Quick category typographic stack */}
           <div className="mt-10 lg:mt-0 flex flex-wrap items-center gap-x-6 gap-y-3">
             {[
-              { name: 'Automobili',       slug: 'osobni-automobili' },
-              { name: 'Motocikli',        slug: 'motocikli' },
-              { name: 'Slobodno vrijeme', slug: 'slobodno-vrijeme' },
-              { name: 'Gospodarska',      slug: 'gospodarska-vozila' },
+              { name: 'Automobili',  slug: 'osobni-automobili' },
+              { name: 'Motocikli',   slug: 'motocikli-atv' },
+              { name: 'Gospodarska', slug: 'gospodarska-vozila' },
+              { name: 'Nautika',     slug: 'nautika' },
             ].map((cat) => (
               <Link
                 key={cat.slug}
