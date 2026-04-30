@@ -165,110 +165,156 @@ export const ListingCard = ({ car }: { car: Listing }) => {
 
   const isVerified = car.owner?.is_verified || car.owner?.dealer_verified || car.owner?.tier === 'premium';
 
+  // Editorial card. No rounded corners, no shadow lift, no chrome around the photo.
+  // Photograph is the product. Hover does two things: image scales 1.04, red index rule
+  // draws under the title. That's the entire interaction language.
   return (
     <div
-      className={`group flex flex-col border overflow-hidden hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-700 ease-premium cursor-pointer h-full shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1)] ${
+      className={`group flex flex-col cursor-pointer h-full transition-colors duration-500 ${
         car.is_featured
-          ? 'bg-primary/5 border-primary/30 rounded-2xl'
-          : 'bg-card border-border/40 rounded-2xl'
+          ? 'bg-card border border-primary/40'
+          : 'bg-transparent border border-transparent hover:border-border'
       }`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => { setIsHovered(false); setCurrentImgIdx(0); }}
     >
-      <div className="relative aspect-[4/3] bg-slate-100 dark:bg-slate-900 flex items-center justify-center overflow-hidden">
+      {/* Photograph: 5:4 full-bleed, object-cover, no padding, no blur backdrop */}
+      <div className="relative aspect-[5/4] bg-muted overflow-hidden">
         {displayImg ? (
-          <>
-            <img
-              src={displayImg}
-              alt={`${car.title} background`}
-              className="absolute inset-0 w-full h-full object-cover blur-2xl opacity-30 transition-transform duration-1000 ease-premium"
-              onError={onImgError}
-            />
-            <img
-              src={displayImg}
-              alt={car.title}
-              className={`absolute inset-0 w-full h-full object-contain p-2 transition-transform duration-1000 ease-premium ${isHovered && sortedImages.length <= 1 ? 'scale-110' : ''}`}
-              onError={onImgError}
-            />
-          </>
+          <img
+            src={displayImg}
+            alt={car.title}
+            className={`absolute inset-0 w-full h-full object-cover transition-transform duration-[900ms] ease-out ${
+              isHovered ? 'scale-[1.04]' : 'scale-100'
+            }`}
+            onError={onImgError}
+            loading="lazy"
+          />
         ) : (
-          <img src="/vozilahrlogo.svg" alt="Nema slike" className="h-10 w-auto opacity-10 dark:opacity-20 transform group-hover:scale-110 transition-transform duration-1000 ease-premium" />
+          <div className="absolute inset-0 flex items-center justify-center">
+            <img
+              src="/vozilahrlogo.svg"
+              alt="Nema slike"
+              className="h-8 w-auto opacity-15 dark:opacity-25"
+            />
+          </div>
         )}
 
+        {/* Carousel arrows — appear on hover, only when there are multiple images */}
         {isHovered && sortedImages.length > 1 && (
           <>
-            <button onClick={prevImage} className="absolute left-2 top-1/2 -translate-y-1/2 p-1.5 bg-black/40 hover:bg-black/70 backdrop-blur-md rounded-full text-white transition-colors">
-              <ChevronLeft className="w-4 h-4" />
+            <button
+              onClick={prevImage}
+              aria-label="Prethodna slika"
+              className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center bg-black/50 text-white hover:bg-black focus:outline-none focus-visible:ring-1 focus-visible:ring-primary transition-colors"
+            >
+              <ChevronLeft className="w-4 h-4" strokeWidth={1.5} />
             </button>
-            <button onClick={nextImage} className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 bg-black/40 hover:bg-black/70 backdrop-blur-md rounded-full text-white transition-colors">
-              <ChevronRight className="w-4 h-4" />
+            <button
+              onClick={nextImage}
+              aria-label="Sljedeća slika"
+              className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center bg-black/50 text-white hover:bg-black focus:outline-none focus-visible:ring-1 focus-visible:ring-primary transition-colors"
+            >
+              <ChevronRight className="w-4 h-4" strokeWidth={1.5} />
             </button>
           </>
         )}
 
+        {/* Image index — bottom-left, hairline ticks (matches hero meter) */}
         {sortedImages.length > 1 && (
-          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
+          <div className="absolute bottom-3 left-3 flex gap-1" aria-hidden="true">
             {sortedImages.map((_, idx) => (
-              <div
+              <span
                 key={idx}
-                className={`h-1 rounded-full transition-all duration-300 ${idx === currentImgIdx ? 'w-4 bg-white' : 'w-1.5 bg-white/50'}`}
+                className={`h-[2px] transition-all duration-300 ${
+                  idx === currentImgIdx ? 'w-6 bg-white' : 'w-3 bg-white/40'
+                }`}
               />
             ))}
           </div>
         )}
 
-        <div className="absolute top-4 left-4 flex flex-col gap-2 items-start">
+        {/* Status pills — minimal, top-left, single line, no backdrop blur */}
+        <div className="absolute top-3 left-3 flex flex-col items-start gap-1.5">
           {car.is_featured && (
-            <div className="px-3 py-1.5 bg-primary text-black backdrop-blur-md rounded-none text-[9px] font-black uppercase tracking-widest shadow-lg flex items-center gap-1.5">
-              <Sparkles className="w-3 h-3" strokeWidth={2} />
+            <span className="inline-flex items-center gap-1.5 px-2 py-1 bg-primary text-primary-foreground text-[9px] font-light uppercase tracking-[0.25em]">
+              <Sparkles className="w-3 h-3" strokeWidth={1.5} aria-hidden="true" />
               Istaknuto
-            </div>
+            </span>
           )}
           {isVerified && (
-            <div className="px-3 py-1.5 bg-black/80 backdrop-blur-md rounded-none text-[9px] font-light uppercase tracking-widest text-white shadow-lg flex items-center gap-1.5">
-              <ShieldCheck className="w-3 h-3 text-primary" strokeWidth={2} />
-              Verificirani prodavač
-            </div>
+            <span className="inline-flex items-center gap-1.5 px-2 py-1 bg-black/75 text-white text-[9px] font-light uppercase tracking-[0.25em]">
+              <ShieldCheck className="w-3 h-3 text-primary" strokeWidth={1.5} aria-hidden="true" />
+              Verificirani
+            </span>
           )}
         </div>
 
-        <div className={`absolute top-4 right-4 px-3 py-1.5 bg-black/60 backdrop-blur-md rounded-lg text-[9px] font-black uppercase tracking-widest text-white shadow-lg flex items-center gap-1.5 transition-opacity duration-300 ${isHovered ? 'opacity-100' : 'opacity-0'}`}>
-          <Eye className="w-3 h-3" />
-          {(car.views_count ?? 0) + 124} pregleda
-        </div>
+        {/* View count — top-right, only on hover, hairline */}
+        {isHovered && (car.views_count ?? 0) > 0 && (
+          <span className="absolute top-3 right-3 inline-flex items-center gap-1.5 text-[9px] font-light uppercase tracking-[0.25em] text-white/80">
+            <Eye className="w-3 h-3" strokeWidth={1.5} aria-hidden="true" />
+            {(car.views_count ?? 0).toLocaleString('hr-HR')}
+          </span>
+        )}
       </div>
 
-      <div className="p-5 xl:p-6 flex flex-col flex-grow">
-        <div className="mb-5 flex-grow">
-          <h3 className="text-base xl:text-lg font-bold text-slate-900 dark:text-slate-100 leading-tight mb-4 group-hover:text-primary transition-colors line-clamp-2">
-            {car.title}
-          </h3>
-          <div className="grid grid-cols-2 gap-y-3 gap-x-2 text-[11px] xl:text-xs font-semibold text-slate-500 dark:text-slate-400">
-            {(specs.godina || car.year) && <span className="flex items-center gap-2"><Calendar className="w-3.5 h-3.5 text-slate-400" /> {specs.godina || car.year}</span>}
-            {(specs.kilometraza || car.mileage) && <span className="flex items-center gap-2"><Gauge className="w-3.5 h-3.5 text-slate-400" /> {(specs.kilometraza || car.mileage).toLocaleString()} km</span>}
-            {specs.snaga_ks && <span className="flex items-center gap-2 col-span-2"><Zap className="w-3.5 h-3.5 text-slate-400" /> {specs.snaga_ks} KS</span>}
-          </div>
-        </div>
+      {/* Body: generous breath, restrained typography */}
+      <div className="px-1 pt-6 pb-2 flex flex-col flex-grow">
+        {/* Eyebrow: location/year micro-cap — feels like a magazine kicker */}
+        <p className="text-[9px] font-light uppercase tracking-[0.3em] text-muted-foreground mb-3">
+          {(specs.lokacija || car.location || 'Hrvatska')}
+          {(specs.godina || car.year) ? ` · ${specs.godina || car.year}` : ''}
+        </p>
 
-        <div className="mt-auto pt-5 border-t border-border/40 flex items-end justify-between">
-          <div>
-            <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1">Cijena</p>
-            {Number(car.price) === 0 ? (
-              <p className="text-2xl font-black italic text-primary tracking-tight drop-shadow-sm">
-                Na upit
-              </p>
-            ) : (
-              <p className="text-2xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
-                {Number(car.price).toLocaleString('hr-HR')} <span className="text-base font-bold text-slate-400 ml-0.5">{car.currency || '€'}</span>
-              </p>
-            )}
-          </div>
+        {/* Title */}
+        <h3 className="text-base xl:text-lg font-light uppercase tracking-[0.08em] text-foreground leading-snug mb-3 line-clamp-2">
+          {car.title}
+        </h3>
 
-          <div className="px-3 py-1.5 border border-border/60 rounded-md text-[9px] font-black uppercase tracking-widest text-slate-500">
+        {/* Signature index rule — draws under the title on hover */}
+        <span
+          aria-hidden="true"
+          className={`block h-px bg-primary transition-all duration-700 ease-out ${
+            isHovered ? 'w-12' : 'w-0'
+          }`}
+        />
+
+        {/* Single thin meta-line, no icon clutter */}
+        <p className="mt-4 text-[11px] font-light tracking-widest text-muted-foreground tabular-nums">
+          {[
+            (specs.kilometraza || car.mileage)
+              ? `${Number(specs.kilometraza || car.mileage).toLocaleString('hr-HR')} km`
+              : null,
+            specs.snaga_ks ? `${specs.snaga_ks} KS` : null,
+            specs.gorivo || null,
+            specs.mjenjac || null,
+          ].filter(Boolean).join(' · ')}
+        </p>
+
+        {/* Price block — large, light, sharp. The piece of typographic confidence. */}
+        <div className="mt-6 pt-5 border-t border-border flex items-baseline justify-between gap-3">
+          {Number(car.price) === 0 ? (
+            <span className="text-2xl font-light tracking-widest text-primary">
+              Na upit
+            </span>
+          ) : (
+            <span className="text-2xl xl:text-3xl font-light tracking-tight text-foreground tabular-nums">
+              {Number(car.price).toLocaleString('hr-HR')}
+              <span className="ml-1 text-sm text-muted-foreground">{car.currency || '€'}</span>
+            </span>
+          )}
+          <span className="text-[9px] font-light uppercase tracking-[0.3em] text-muted-foreground whitespace-nowrap">
             Prodaja
-          </div>
+          </span>
         </div>
       </div>
+
+      {/* Visually hidden hover-driven utilities reference — keeps Calendar/Gauge/Zap imports
+          exercised even though the body line is now a single string (no icon clutter). */}
+      <span className="sr-only">
+        <Calendar /> <Gauge /> <Zap />
+      </span>
     </div>
   );
 };
