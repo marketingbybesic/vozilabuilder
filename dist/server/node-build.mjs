@@ -50,9 +50,94 @@ async function tryServe(res, filePath) {
   }
 }
 
+// ---- API: Claude Haiku copywriter for listing descriptions -----------------
+// POST /api/copywriter
+// Body: { make, model, year, mileage, fuel, transmission, power_hp, body_type,
+//         color, condition, equipment?: string[], language?: 'hr'|'en' }
+// Returns: { description: string }
+//
+// Requires env ANTHROPIC_API_KEY. Without it the endpoint returns a clean
+// 503 with a "configure ANTHROPIC_API_KEY" message so the UI can fall back.
+async function handleCopywriter(req, res) {
+  if (req.method !== 'POST') { res.writeHead(405).end(); return; }
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) {
+    res.writeHead(503, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ error: 'ANTHROPIC_API_KEY not configured on server' }));
+    return;
+  }
+  let body = '';
+  for await (const chunk of req) body += chunk;
+  let payload;
+  try { payload = JSON.parse(body); }
+  catch { res.writeHead(400).end('Bad JSON'); return; }
+
+  const { make, model, year, mileage, fuel, transmission, power_hp, body_type, color, condition, equipment = [], language = 'hr' } = payload || {};
+  const langInstr = language === 'en'
+    ? 'Write the description in English.'
+    : 'Napiši opis na hrvatskom jeziku, prirodnim tonom, bez markentinških klišeja.';
+
+  const prompt = `${langInstr}
+
+Vehicle facts:
+- Make: ${make ?? '?'} | Model: ${model ?? '?'} | Year: ${year ?? '?'}
+- Mileage: ${mileage ?? '?'} km | Fuel: ${fuel ?? '?'} | Transmission: ${transmission ?? '?'}
+- Power: ${power_hp ?? '?'} HP | Body: ${body_type ?? '?'} | Color: ${color ?? '?'}
+- Condition: ${condition ?? '?'}
+- Equipment: ${equipment.join(', ') || '—'}
+
+Write 3 short paragraphs (around 90-130 words total):
+1. Hook line on what makes this vehicle worth attention.
+2. Key technical highlights, written naturally, not as a bullet list.
+3. Practical info (history, condition, location-friendly tone) and a soft CTA to schedule a viewing.
+
+Do not invent facts. Do not use marketing fluff like "amazing" or "perfect".
+Don't promise warranties. Use "EUR" not "€" inside running prose. No emojis.`;
+
+  try {
+    const apiRes = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 600,
+        messages: [{ role: 'user', content: prompt }],
+      }),
+    });
+    if (!apiRes.ok) {
+      const txt = await apiRes.text();
+      res.writeHead(apiRes.status, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: `Anthropic API error ${apiRes.status}`, detail: txt.slice(0, 400) }));
+      return;
+    }
+    const data = await apiRes.json();
+    const text = (data?.content || []).map(c => c?.text || '').join('').trim();
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ description: text }));
+  } catch (e) {
+    res.writeHead(502, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ error: 'Upstream Anthropic call failed', detail: String(e?.message || e) }));
+  }
+}
+
+// ----------------------------------------------------------------------------
+
 const server = createServer(async (req, res) => {
   try {
     const url = new URL(req.url, `http://${req.headers.host}`);
+
+    // API routes
+    if (url.pathname === '/api/copywriter') return handleCopywriter(req, res);
+    if (url.pathname === '/api/health') {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ ok: true, ts: Date.now() }));
+      return;
+    }
+
     const safe = url.pathname.replace(/\.\.+/g, '').replace(/^\/+/, '');
     const direct = join(DIST_DIR, safe);
     if (await tryServe(res, direct)) return;

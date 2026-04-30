@@ -10,6 +10,9 @@ import {
 } from 'lucide-react';
 import { navigationMenu } from '../../config/taxonomy';
 import { categoryFilters } from '../../config/filters';
+import { VinQuickFill } from './VinQuickFill';
+import type { VinResult } from '../../lib/vinDecoder';
+import { AiCopywriterButton } from './AiCopywriterButton';
 
 type WizardStep = 1 | 2 | 3;
 
@@ -336,14 +339,40 @@ export const CreateListingWizard = () => {
 
 // Step 1: Category & Basic Info
 const Step1 = ({ formData, setFormData }: any) => {
+  // Apply decoded VIN data to the form (the magic moment)
+  const onVinDecoded = (vin: VinResult) => {
+    setFormData((prev: any) => ({
+      ...prev,
+      title: prev.title || [vin.year, vin.make, vin.model].filter(Boolean).join(' '),
+      attributes: {
+        ...prev.attributes,
+        vin: vin.vin,
+        ...(vin.make && { make: vin.make }),
+        ...(vin.model && { model: vin.model }),
+        ...(vin.year && { year: vin.year }),
+        ...(vin.engine_cc && { engine_cc: vin.engine_cc }),
+        ...(vin.fuel && { fuel: vin.fuel }),
+        ...(vin.body_type && { body_type: vin.body_type }),
+        ...(vin.drivetrain && { drivetrain: vin.drivetrain }),
+        ...(vin.transmission && { transmission: vin.transmission }),
+        ...(vin.doors && { doors: vin.doors }),
+      },
+    }));
+  };
+
   return (
     <div className="space-y-8">
       <div>
-        <h2 className="text-2xl font-black text-white mb-8">Osnove Informacije</h2>
-        
+        <h2 className="text-2xl font-light uppercase tracking-[0.08em] text-foreground mb-8">Osnovne informacije</h2>
+
+        {/* VIN quick-fill — magic moment */}
+        <div className="mb-8">
+          <VinQuickFill onDecoded={onVinDecoded} initialValue={formData?.attributes?.vin || ''} />
+        </div>
+
         {/* Category Selection */}
         <div className="mb-8">
-          <label className="block text-xs font-black uppercase tracking-widest text-neutral-400 mb-4">
+          <label className="block text-xs font-light uppercase tracking-[0.25em] text-muted-foreground mb-4">
             <Car className="w-4 h-4 inline mr-2" />
             Kategorija
           </label>
@@ -406,15 +435,22 @@ const Step1 = ({ formData, setFormData }: any) => {
 
         {/* Description */}
         <div className="mb-8">
-          <label className="block text-xs font-black uppercase tracking-widest text-neutral-400 mb-4">
-            Opis
-          </label>
+          <div className="flex items-center justify-between mb-4">
+            <label className="text-xs font-light uppercase tracking-[0.25em] text-muted-foreground">
+              Opis
+            </label>
+            <AiCopywriterButton
+              attributes={formData.attributes || {}}
+              title={formData.title}
+              onGenerated={(text) => setFormData((prev: any) => ({ ...prev, description: text }))}
+            />
+          </div>
           <textarea
             value={formData.description}
             onChange={(e) => setFormData((prev: any) => ({ ...prev, description: e.target.value }))}
             rows={6}
-            placeholder="Detaljno opišite vozilo..."
-            className="w-full px-8 py-4 bg-card border border-neutral-800 rounded-none text-white font-medium text-sm focus:outline-none focus:border-white transition-all resize-none"
+            placeholder="Detaljno opišite vozilo… ili kliknite Generiraj AI opis."
+            className="w-full px-6 py-4 bg-background border border-border text-foreground font-light text-sm focus:outline-none focus:border-primary transition-all resize-none"
           />
         </div>
 

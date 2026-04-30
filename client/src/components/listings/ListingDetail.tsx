@@ -99,67 +99,71 @@ const FUEL_COSTS: Record<string, { litres: number; pricePerUnit: number; unit: s
   plin:       { litres: 9.0,  pricePerUnit: 0.72, unit: 'L' },
 };
 
-const CostPer100km = ({ attributes }: { attributes: Record<string, any> }) => {
-  const fuelRaw = (attributes.fuelType || attributes.fuel || attributes.gorivo || '').toLowerCase();
-  const fuelKey = Object.keys(FUEL_COSTS).find(k => fuelRaw.includes(k));
-  if (!fuelKey) return null;
+// CostPer100km — superseded by ./FuelCostCard, kept as an alias for backward compat.
+import { FuelCostCard as FuelCostCardImpl } from './FuelCostCard';
+const CostPer100km = ({ attributes }: { attributes: Record<string, any> }) => (
+  <FuelCostCardImpl attributes={attributes} />
+);
 
-  const { litres, pricePerUnit } = FUEL_COSTS[fuelKey];
-  const cost = litres * pricePerUnit;
-
-  return (
-    <div className="bg-card border border-neutral-800 rounded-none p-6">
-      <div className="flex items-start gap-3 mb-3">
-        <Fuel className="w-5 h-5 text-white/40 flex-shrink-0 mt-0.5" strokeWidth={1.5} />
-        <div>
-          <p className="text-[10px] font-light uppercase tracking-widest text-white/40 mb-1">
-            Procijenjeni trošak goriva
-          </p>
-          <p className="text-2xl font-light text-white">
-            ~€{cost.toFixed(2)}<span className="text-sm text-white/40"> / 100km</span>
-          </p>
-          <p className="text-[10px] font-light text-white/30 mt-2 leading-relaxed">
-            Procjena prema prosječnoj potrošnji i tržišnim cijenama goriva u RH
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// --- MILESTONE 6: KNN SIMILAR VEHICLES ---
+// --- KNN SIMILAR VEHICLES — multi-attribute scoring ---
+//
+// Scores candidates against this listing's attributes and returns top 4.
+// Score weights (tunable):
+//   same category:        100  (HARD filter — only same category considered)
+//   same make:            +60
+//   same model:           +40
+//   year proximity:       up to +40 (full credit at exact year, 0 at ±5y)
+//   fuel match:           +25
+//   transmission match:   +15
+//   price proximity:      up to +50 (full credit at exact price, 0 at ±50%)
+//   body_type match:      +15
+//   drivetrain match:     +10
 
 const SimilarVehicles = ({ listing }: { listing: Listing }) => {
   const [similar, setSimilar] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
   const attributes = listing.attributes || {};
+  const categoryId = (listing as any).category_id;
 
   useEffect(() => {
     const fetchSimilar = async () => {
       try {
-        let query = supabase
+        // Pull candidates from the same category (HARD filter)
+        let q = supabase
           .from('listings')
-          .select('*, listing_images(id, url, is_primary, sort_order)')
+          .select('*, categories(slug, name), listing_images(id, url, is_primary, sort_order)')
           .eq('status', 'active')
           .neq('id', listing.id)
-          .gte('price', listing.price * 0.8)
-          .lte('price', listing.price * 1.2)
-          .limit(4);
+          .limit(40); // overshoot so the JS scorer has room
 
-        const make = attributes.make || attributes.marka;
-        if (make) {
-          query = query.eq('attributes->>make', make);
-        }
+        if (categoryId) q = q.eq('category_id', categoryId);
 
-        const { data, error } = await query;
+        const { data, error } = await q;
         if (error) throw error;
+        const candidates = (data || []) as Listing[];
 
-        const normalized = (data || []).map((item: any) => ({
-          ...item,
-          owner: item.owner,
-        })) as Listing[];
-
-        setSimilar(normalized);
+        const A = attributes;
+        const scored = candidates.map((c) => {
+          const ca = (c.attributes || {}) as Record<string, any>;
+          let score = 100;
+          if (A.make && ca.make && String(A.make).toLowerCase() === String(ca.make).toLowerCase()) score += 60;
+          if (A.model && ca.model && String(A.model).toLowerCase() === String(ca.model).toLowerCase()) score += 40;
+          if (A.year && ca.year) {
+            const dy = Math.abs(Number(A.year) - Number(ca.year));
+            if (dy <= 5) score += Math.round(40 * (1 - dy / 5));
+          }
+          if (A.fuel && ca.fuel && A.fuel === ca.fuel) score += 25;
+          if (A.transmission && ca.transmission && A.transmission === ca.transmission) score += 15;
+          if (listing.price > 0 && c.price > 0) {
+            const dp = Math.abs(c.price - listing.price) / listing.price;
+            if (dp <= 0.5) score += Math.round(50 * (1 - dp / 0.5));
+          }
+          if (A.body_type && ca.body_type && A.body_type === ca.body_type) score += 15;
+          if (A.drivetrain && ca.drivetrain && A.drivetrain === ca.drivetrain) score += 10;
+          return { c, score };
+        });
+        scored.sort((a, b) => b.score - a.score);
+        setSimilar(scored.slice(0, 4).map((s) => s.c));
       } catch {
         setSimilar([]);
       } finally {
@@ -167,26 +171,35 @@ const SimilarVehicles = ({ listing }: { listing: Listing }) => {
       }
     };
 
-    if (listing.price > 0) fetchSimilar();
-    else setLoading(false);
-  }, [listing.id]);
+    fetchSimilar();
+  }, [listing.id, categoryId]);
 
   if (loading || similar.length === 0) return null;
 
   return (
-    <div className="max-w-7xl mx-auto px-8 pb-16">
-      <div className="flex items-center gap-3 mb-6">
-        <Sparkles className="w-5 h-5 text-primary" strokeWidth={1.5} />
-        <h2 className="text-xs font-light uppercase tracking-widest text-white/40">Slična vozila</h2>
+    <section className="max-w-7xl mx-auto px-6 sm:px-8 pb-16 lg:pb-20">
+      <div className="flex items-end justify-between mb-8 lg:mb-10">
+        <div>
+          <p className="text-[10px] font-light uppercase tracking-[0.35em] text-primary mb-2 inline-flex items-center gap-2">
+            <Sparkles className="w-3 h-3" strokeWidth={1.5} aria-hidden="true" />
+            Preporučeno
+          </p>
+          <h2 className="text-xl sm:text-2xl lg:text-3xl font-light uppercase tracking-tight text-foreground">
+            Slična vozila
+          </h2>
+        </div>
+        <span className="text-[10px] font-light uppercase tracking-[0.3em] text-muted-foreground tabular-nums hidden sm:block">
+          {String(similar.length).padStart(2, '0')} izbora
+        </span>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {similar.map(car => (
-          <Link key={car.id} to={`/listing/${car.id}`}>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
+        {similar.map((car) => (
+          <Link key={car.id} to={`/listing/${car.id}`} className="block">
             <ListingCard car={car} />
           </Link>
         ))}
       </div>
-    </div>
+    </section>
   );
 };
 

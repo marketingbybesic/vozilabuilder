@@ -14,6 +14,8 @@ import { Listing } from '../../types';
 import { Helmet } from 'react-helmet-async';
 import { onImgError } from '../../lib/imageFallback';
 import { matchScore } from '../../lib/matchScore';
+import { SavedSearchesBar, buildLabel } from '../search/SavedSearches';
+import { getLocationSilently } from '../../lib/locationDefaults';
 
 const ITEMS_PER_PAGE = 9;
 
@@ -26,16 +28,29 @@ const MAKES = [
   'Chrysler', 'Dodge', 'Tesla', 'Rivian'
 ];
 
-// --- WEIGHTED SCORE CALCULATION ---
+// --- WEIGHTED SCORE — sort key for "Prema preporuci" ---
+//
+// Combines:
+//   • matchScore quality (0-100, see lib/matchScore.ts)
+//   • freshness boost (newer listings get up to +20)
+//   • is_featured kicker (+15) so paid boosts surface
+//   • verified-dealer kicker (+8) so trustworthy sources surface
+//
+// Producing a single 0-150 number used purely for ordering.
+
+const FRESHNESS_HALFLIFE_DAYS = 14;
 const computeWeightedScore = (car: Listing): number => {
-  let score = 1.0;
-  const images = car.listing_images || [];
-  score += Math.min(images.length * 0.3, 1.5);
-  if (car.is_featured) score += 0.5;
-  const isVerified = car.owner?.is_verified || car.owner?.dealer_verified || car.owner?.tier === 'premium';
-  if (isVerified) score += 0.3;
-  if (car.description && car.description.length > 100) score += 0.2;
-  return score;
+  const base = matchScore(car).total; // 0..100
+  let bonus = 0;
+  // Freshness — exponential decay on created_at
+  if (car.created_at) {
+    const ageDays = (Date.now() - new Date(car.created_at).getTime()) / (1000 * 60 * 60 * 24);
+    bonus += 20 * Math.exp(-ageDays / FRESHNESS_HALFLIFE_DAYS);
+  }
+  if (car.is_featured) bonus += 15;
+  const owner = (car as any).owner;
+  if (owner?.dealer_verified || owner?.is_verified || owner?.tier === 'premium') bonus += 8;
+  return base + bonus;
 };
 
 // --- CUSTOM UI COMPONENTS ---
@@ -618,6 +633,22 @@ export const ListingFeed = () => {
     queryState.year_min, queryState.year_max, queryState.mileage_max, queryState.power_min,
     queryState.fuel, queryState.transmission, queryState.sort, queryState.lat, queryState.lng, queryState.radius]);
 
+  // One-time: if URL has no lat/lng yet, silently pre-fill with the user's
+  // approximate location (cached → IP fallback). Doesn't auto-apply radius
+  // search — just primes the LocationFilter widget so the user only has to
+  // set a radius to get nearby results.
+  const [locationPrimed, setLocationPrimed] = useState(false);
+  useEffect(() => {
+    if (locationPrimed) return;
+    if (queryState.lat && queryState.lng) { setLocationPrimed(true); return; }
+    getLocationSilently().then((loc) => {
+      if (!queryState.lat && !queryState.lng) {
+        setQueryState({ lat: String(loc.lat), lng: String(loc.lng) } as any);
+      }
+      setLocationPrimed(true);
+    }).catch(() => setLocationPrimed(true));
+  }, [locationPrimed, queryState.lat, queryState.lng, setQueryState]);
+
   const setFilter = (key: string, value: string | number) => {
     setQueryState({ [key]: value || null } as any);
   };
@@ -897,13 +928,21 @@ export const ListingFeed = () => {
         </aside>
 
         <div className="flex-1 flex flex-col min-w-0">
+          {/* Saved searches strip — driver of return visits */}
+          <SavedSearchesBar
+            currentUrl={typeof window !== 'undefined' ? window.location.pathname + window.location.search : '/'}
+            currentIds={cars.map((c) => c.id)}
+            label={buildLabel(queryState as any, displayTitle)}
+            categorySlug={categorySlug || undefined}
+          />
+
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
             <div>
-              <h2 className="text-3xl md:text-4xl font-black uppercase tracking-widest text-slate-900 dark:text-slate-100">
+              <h2 className="text-3xl md:text-4xl font-light uppercase tracking-[0.08em] text-foreground">
                 {queryState.make ? `${queryState.make}${queryState.model ? ` ${queryState.model}` : ''}` : displayTitle}
               </h2>
               {totalCount > 0 && !loading && (
-                <p className="text-sm text-slate-500 mt-1 font-light uppercase tracking-widest">
+                <p className="text-sm text-muted-foreground mt-1 font-light uppercase tracking-widest tabular-nums">
                   {totalCount} oglasa
                 </p>
               )}

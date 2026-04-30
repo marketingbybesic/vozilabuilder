@@ -1,4 +1,5 @@
 import imageCompression from 'browser-image-compression';
+import { watermarkFile } from './watermark';
 import { supabase } from './supabase';
 
 interface CompressionOptions {
@@ -49,8 +50,10 @@ export const uploadImage = async (
   onProgress?: (progress: number) => void
 ): Promise<string> => {
   try {
-    // Compress image first
-    const compressed = await compressImage(file);
+    // 1. Watermark first (Canvas), 2. then compress to WebP
+    let prepared = file;
+    try { prepared = await watermarkFile(file); } catch { /* graceful: ship original if Canvas blew up */ }
+    const compressed = await compressImage(prepared);
 
     // Generate path
     const filename = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}.webp`;
