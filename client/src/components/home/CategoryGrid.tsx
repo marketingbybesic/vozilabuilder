@@ -1,13 +1,14 @@
 import { Link } from 'react-router-dom';
 import { navigationMenu } from '../../config/taxonomy';
+import { onImgError } from '../../lib/imageFallback';
 
 const categoryImages: Record<string, string> = {
-  'osobni-automobili': 'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=600&h=400&fit=crop',
-  'motocikli': 'https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=600&h=400&fit=crop',
-  'slobodno-vrijeme': 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=600&h=400&fit=crop',
-  'gospodarska-vozila': 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=600&h=400&fit=crop',
-  'dijelovi-oprema': 'https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=600&h=400&fit=crop',
-  'strojevi': 'https://images.unsplash.com/photo-1574263869436-07478e882706?w=600&h=400&fit=crop',
+  'osobni-automobili': '/img/categories/cars.jpg',
+  'motocikli': '/img/categories/motorcycles.jpg',
+  'slobodno-vrijeme': '/img/categories/leisure.jpg',
+  'gospodarska-vozila': '/img/categories/commercial.jpg',
+  'dijelovi-oprema': '/img/categories/parts.jpg',
+  'strojevi': '/img/categories/machinery.jpg',
 };
 
 export const CategoryGrid = () => {
@@ -37,6 +38,7 @@ export const CategoryGrid = () => {
                 alt={category.name}
                 className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
                 loading="lazy"
+                onError={onImgError}
               />
 
               {/* Dark base overlay */}

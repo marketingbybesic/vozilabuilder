@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Search, SlidersHorizontal } from 'lucide-react';
 import { useTypingAnimation } from '../../hooks/useTypingAnimation';
 import { SuperSearchModal } from '../search/SuperSearchModal';
+import { onImgError } from '../../lib/imageFallback';
 
 export const Hero = () => {
   const [searchModalOpen, setSearchModalOpen] = useState(false);
@@ -32,9 +33,10 @@ export const Hero = () => {
       {/* Background Image */}
       <div className="absolute inset-0 z-0">
         <img
-          src="https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=1920&h=1080&fit=crop&q=80"
+          src="/img/placeholder-car.jpg"
           alt="Luxury car background"
           className="w-full h-full object-cover"
+          onError={onImgError}
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/30 to-black/80" />
       </div>

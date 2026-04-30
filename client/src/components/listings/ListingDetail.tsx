@@ -17,6 +17,7 @@ import Zoom from 'yet-another-react-lightbox/plugins/zoom';
 import Thumbnails from 'yet-another-react-lightbox/plugins/thumbnails';
 import 'yet-another-react-lightbox/styles.css';
 import 'yet-another-react-lightbox/plugins/thumbnails.css';
+import { onImgError, PLACEHOLDER_CAR } from '../../lib/imageFallback';
 
 // --- MILESTONE 4: HISTORY TIMELINE ---
 
@@ -288,7 +289,7 @@ export const ListingDetail = () => {
   }
 
   const images = listing.listing_images || [];
-  const sortedImages = images.sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
+  const sortedImages = [...images].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
 
   // Price analysis (dummy median for demo)
   const dummyMedian = 25000;
@@ -359,9 +360,10 @@ export const ListingDetail = () => {
             {sortedImages.length === 0 ? (
               <div className="relative aspect-video bg-neutral-900 rounded-none overflow-hidden">
                 <img
-                  src="/placeholder-car.jpg"
+                  src={PLACEHOLDER_CAR}
                   alt={listing.title}
                   className="w-full h-full object-cover"
+                  onError={onImgError}
                 />
               </div>
             ) : sortedImages.length === 1 ? (
@@ -376,6 +378,7 @@ export const ListingDetail = () => {
                   src={sortedImages[0].url}
                   alt={listing.title}
                   className="w-full h-full object-cover"
+                  onError={onImgError}
                 />
                 {listing.status === 'sold' && (
                   <div className="absolute inset-0 bg-black/40 flex items-center justify-center pointer-events-none">
@@ -404,6 +407,7 @@ export const ListingDetail = () => {
                     src={sortedImages[0].url}
                     alt={listing.title}
                     className="w-full h-full object-cover"
+                    onError={onImgError}
                   />
                   {listing.status === 'sold' && (
                     <div className="absolute inset-0 bg-black/40 flex items-center justify-center pointer-events-none">
@@ -433,6 +437,7 @@ export const ListingDetail = () => {
                         src={img.url}
                         alt={`Thumbnail ${idx + 2}`}
                         className="w-full h-full object-cover"
+                        onError={onImgError}
                       />
                       {sortedImages.length > 3 && idx === 1 && (
                         <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
@@ -457,7 +462,7 @@ export const ListingDetail = () => {
                         setLightboxOpen(true);
                       }}
                     >
-                      <img src={img.url} alt={`Thumbnail ${idx + 2}`} className="w-full h-full object-cover" />
+                      <img src={img.url} alt={`Thumbnail ${idx + 2}`} className="w-full h-full object-cover" onError={onImgError} />
                     </div>
                   ))}
                 </div>

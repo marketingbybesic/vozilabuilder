@@ -52,7 +52,7 @@ export const seedListings: SeedListing[] = [
     description: 'Volkswagen Golf 8 GTI 245 KS u odličnom stanju. Digitalni kokpit, harman/kardon audio, head-up display. Vozilo nije koristio u sportu.',
     contact_phone: '+385 91 111 2222', contact_email: 'vw@vozila.hr',
     attributes: { make: 'Volkswagen', model: 'Golf 8 GTI', year: 2021, mileage: 38000, fuel: 'Benzin', transmission: 'Automatik', power_kw: 180, power_hp: 245, engine_cc: 1984, doors: 5, color: 'Tornado Red', condition: 'Odlično' },
-    images: ['https://images.unsplash.com/photo-1589363460779-cd717d7a82a0?w=800&h=600&fit=crop'],
+    images: ['https://images.unsplash.com/photo-1605559424843-9e4c228bf1c2?w=800&h=600&fit=crop'],
   },
   {
     title: 'Toyota Yaris 1.5 Hybrid 2022',
@@ -70,7 +70,7 @@ export const seedListings: SeedListing[] = [
     description: 'Škoda Octavia 2.0 TDI DSG u odličnom stanju. Prostrana, ekonomična i pouzdana. Navigacija, parkirni senzori, grijanje sjedala.',
     contact_phone: '+385 42 123 456', contact_email: 'skoda@vozila.hr',
     attributes: { make: 'Škoda', model: 'Octavia 2.0 TDI', year: 2020, mileage: 75000, fuel: 'Diesel', transmission: 'Automatik', power_kw: 110, power_hp: 150, engine_cc: 1968, doors: 5, color: 'Magic Black', condition: 'Dobro' },
-    images: ['https://images.unsplash.com/photo-1617469767104-65fce5d02ebb?w=800&h=600&fit=crop'],
+    images: ['https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=800&h=600&fit=crop'],
   },
   {
     title: 'Renault Clio 1.0 TCe 2021',
@@ -106,7 +106,7 @@ export const seedListings: SeedListing[] = [
     description: 'Hyundai Tucson Executive Plus paketa u potpunoj opremi. Panoramski krov, 360° kamera, ventilirana sjedala, bežično punjenje.',
     contact_phone: '+385 91 777 8888', contact_email: 'hyundai@vozila.hr',
     attributes: { make: 'Hyundai', model: 'Tucson 1.6 T-GDI 4WD', year: 2022, mileage: 15000, fuel: 'Benzin', transmission: 'Automatik', power_kw: 132, power_hp: 180, engine_cc: 1598, doors: 5, color: 'Phantom Black', condition: 'Odlično' },
-    images: ['https://images.unsplash.com/photo-1627369553019-d68b5cbdc4d5?w=800&h=600&fit=crop'],
+    images: ['https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=800&h=600&fit=crop'],
   },
   {
     title: 'Kia Sportage 1.6 CRDi 2020',
@@ -115,7 +115,7 @@ export const seedListings: SeedListing[] = [
     description: 'Kia Sportage GT-Line u odličnom stanju. Bogata oprema, svi servisi uredno obavljeni. 7-godišnja Kia garancija.',
     contact_phone: '+385 21 987 654', contact_email: 'kia@vozila.hr',
     attributes: { make: 'Kia', model: 'Sportage 1.6 CRDi', year: 2020, mileage: 54000, fuel: 'Diesel', transmission: 'Automatik', power_kw: 100, power_hp: 136, engine_cc: 1598, doors: 5, color: 'Snow White Pearl', condition: 'Odlično' },
-    images: ['https://images.unsplash.com/photo-1633578680427-f0aa5a861234?w=800&h=600&fit=crop'],
+    images: ['https://images.unsplash.com/photo-1606220588913-b3aacb4d2f46?w=800&h=600&fit=crop'],
   },
   {
     title: 'Peugeot 3008 GT 1.5 BlueHDi 2021',
@@ -133,7 +133,7 @@ export const seedListings: SeedListing[] = [
     description: 'Citroën C5 Aircross Shine Plus s naprednom suspenzijom Progressive Hydraulic Cushions. Iznimno udobno vozilo za duga putovanja.',
     contact_phone: '+385 51 222 333', contact_email: 'citroen@vozila.hr',
     attributes: { make: 'Citroën', model: 'C5 Aircross Shine', year: 2020, mileage: 58000, fuel: 'Diesel', transmission: 'Automatik', power_kw: 96, power_hp: 130, engine_cc: 1499, doors: 5, color: 'Pearl White', condition: 'Dobro' },
-    images: ['https://images.unsplash.com/photo-1625231338773-d3e4a3d4f9e7?w=800&h=600&fit=crop'],
+    images: ['https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?w=800&h=600&fit=crop'],
   },
   {
     title: 'SEAT Leon 2.0 TDI FR 2019',
@@ -151,7 +151,7 @@ export const seedListings: SeedListing[] = [
     description: 'Volvo XC60 T5 Inscription u vrhunskom stanju. Panoramski krov, Bowers & Wilkins audio sustav, pilot assist. Scandinavia premium SUV.',
     contact_phone: '+385 91 444 5555', contact_email: 'volvo@vozila.hr',
     attributes: { make: 'Volvo', model: 'XC60 T5 AWD', year: 2020, mileage: 49000, fuel: 'Benzin', transmission: 'Automatik', power_kw: 184, power_hp: 250, engine_cc: 1969, doors: 5, color: 'Osmium Grey', condition: 'Odlično' },
-    images: ['https://images.unsplash.com/photo-1617531653332-bd46c16f4d68?w=800&h=600&fit=crop'],
+    images: ['https://images.unsplash.com/photo-1542228262-3d663b306a53?w=800&h=600&fit=crop'],
   },
   {
     title: 'Fiat 500X 1.0 FireFly 2020',
@@ -196,7 +196,7 @@ export const seedListings: SeedListing[] = [
     description: 'VW Passat Variant Business paket. Prostran kombi idealan za obitelj ili poslovne korisnike. Niska potrošnja, izvrsna udobnost.',
     contact_phone: '+385 42 777 888', contact_email: 'vw.varazdin@vozila.hr',
     attributes: { make: 'Volkswagen', model: 'Passat Variant 2.0 TDI', year: 2020, mileage: 84000, fuel: 'Diesel', transmission: 'Automatik', power_kw: 110, power_hp: 150, engine_cc: 1968, doors: 5, color: 'Deep Black Pearl', condition: 'Dobro' },
-    images: ['https://images.unsplash.com/photo-1596778402966-e0862c37f0fb?w=800&h=600&fit=crop'],
+    images: ['https://images.unsplash.com/photo-1583121274602-3e2820c69888?w=800&h=600&fit=crop'],
   },
   {
     title: 'Tesla Model 3 Long Range AWD 2022',
@@ -232,7 +232,7 @@ export const seedListings: SeedListing[] = [
     description: 'Škoda Kodiaq Sportline 7-sjedala. Potpuna oprema, panoramski krov, Canton audio, Canton sustav. Odlično stanje.',
     contact_phone: '+385 31 123 456', contact_email: 'skoda.osijek@vozila.hr',
     attributes: { make: 'Škoda', model: 'Kodiaq 2.0 TDI 4x4', year: 2021, mileage: 44000, fuel: 'Diesel', transmission: 'Automatik', power_kw: 140, power_hp: 190, engine_cc: 1968, doors: 5, color: 'Brillant Silver', condition: 'Odlično' },
-    images: ['https://images.unsplash.com/photo-1617286318853-f7e5fc7a32a4?w=800&h=600&fit=crop'],
+    images: ['https://images.unsplash.com/photo-1542362567-b07e54358753?w=800&h=600&fit=crop'],
   },
   {
     title: 'Mazda CX-5 2.2 SkyActiv-D 4WD 2020',
@@ -331,7 +331,7 @@ export const seedListings: SeedListing[] = [
     description: 'Opel Insignia Grand Sport Excellence. Masažna sjedala, head-up display, IntelliLux LED Matrix. Poslovna klasa po pristupačnoj cijeni.',
     contact_phone: '+385 31 555 666', contact_email: 'opel.osijek@vozila.hr',
     attributes: { make: 'Opel', model: 'Insignia Grand Sport 2.0 CDTI', year: 2019, mileage: 102000, fuel: 'Diesel', transmission: 'Automatik', power_kw: 125, power_hp: 170, engine_cc: 1598, doors: 4, color: 'Sovereign Silver', condition: 'Dobro' },
-    images: ['https://images.unsplash.com/photo-1543854589-fce0a5b03764?w=800&h=600&fit=crop'],
+    images: ['https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?w=800&h=600&fit=crop'],
   },
   {
     title: 'Toyota RAV4 2.5 Hybrid AWD-i 2021',
@@ -385,7 +385,7 @@ export const seedListings: SeedListing[] = [
     description: 'Honda Jazz Crosstar e:HEV — inovativni full hibrid bez vanjskog punjenja. Magic Seat sustav, originalna Honda garancija do 2026.',
     contact_phone: '+385 51 888 999', contact_email: 'honda.rijeka@vozila.hr',
     attributes: { make: 'Honda', model: 'Jazz 1.5 i-MMD Crosstar', year: 2021, mileage: 26000, fuel: 'Hibrid', transmission: 'Automatik', power_kw: 80, power_hp: 109, engine_cc: 1498, doors: 5, color: 'Aegean Blue Metallic', condition: 'Odlično' },
-    images: ['https://images.unsplash.com/photo-1617469767104-65fce5d02ebb?w=800&h=600&fit=crop'],
+    images: ['https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=800&h=600&fit=crop'],
   },
   {
     title: 'Peugeot 208 1.2 PureTech GT 2022',
@@ -394,7 +394,7 @@ export const seedListings: SeedListing[] = [
     description: 'Peugeot 208 GT s trofaznim punjačem i potpunim i-Cockpit digitalnim instrumentima. Najdostojanstveniji mali auto u klasi.',
     contact_phone: '+385 23 000 111', contact_email: 'peugeot.zadar@vozila.hr',
     attributes: { make: 'Peugeot', model: '208 1.2 PureTech GT', year: 2022, mileage: 17000, fuel: 'Benzin', transmission: 'Automatik', power_kw: 96, power_hp: 130, engine_cc: 1199, doors: 5, color: 'Elixir Red', condition: 'Odlično' },
-    images: ['https://images.unsplash.com/photo-1625231338773-d3e4a3d4f9e7?w=800&h=600&fit=crop'],
+    images: ['https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?w=800&h=600&fit=crop'],
   },
   {
     title: 'Audi e-tron 55 Quattro 2020',
@@ -457,7 +457,7 @@ export const seedListings: SeedListing[] = [
     description: 'Škoda Fabia Style najnovija generacija. Digitalni instrumenti, ambijentalno osvjetljenje, bežično punjenje. Idealan mali auto za svaki dan.',
     contact_phone: '+385 20 555 666', contact_email: 'skoda.dubrovnik@vozila.hr',
     attributes: { make: 'Škoda', model: 'Fabia 1.0 TSI', year: 2022, mileage: 12000, fuel: 'Benzin', transmission: 'Ručni', power_kw: 70, power_hp: 95, engine_cc: 999, doors: 5, color: 'Race Blue', condition: 'Odlično' },
-    images: ['https://images.unsplash.com/photo-1617286318853-f7e5fc7a32a4?w=800&h=600&fit=crop'],
+    images: ['https://images.unsplash.com/photo-1542362567-b07e54358753?w=800&h=600&fit=crop'],
   },
   {
     title: 'BMW 118i M Sport 2021',
@@ -493,7 +493,7 @@ export const seedListings: SeedListing[] = [
     description: 'Volvo XC40 Recharge P8 AWD 408 KS. Do 418 km autonomije, Google Automotive OS, panoramski krov, Harman Kardon. Skandinavski premium EV.',
     contact_phone: '+385 23 222 333', contact_email: 'volvo.zadar@vozila.hr',
     attributes: { make: 'Volvo', model: 'XC40 Recharge', year: 2022, mileage: 13000, fuel: 'Električni', transmission: 'Automatik', power_kw: 300, power_hp: 408, engine_cc: 0, doors: 5, color: 'Crystal White Pearl', condition: 'Odlično' },
-    images: ['https://images.unsplash.com/photo-1617531653332-bd46c16f4d68?w=800&h=600&fit=crop'],
+    images: ['https://images.unsplash.com/photo-1542228262-3d663b306a53?w=800&h=600&fit=crop'],
   },
   {
     title: 'Mitsubishi Eclipse Cross 1.5 T 2WD 2020',
@@ -502,7 +502,7 @@ export const seedListings: SeedListing[] = [
     description: 'Mitsubishi Eclipse Cross Instyle u punoj opremi. Panoramski krov, surround kamera, 360° prikaz, elegantni interijer.',
     contact_phone: '+385 35 222 333', contact_email: 'mitsubishi@vozila.hr',
     attributes: { make: 'Mitsubishi', model: 'Eclipse Cross 1.5 T', year: 2020, mileage: 46000, fuel: 'Benzin', transmission: 'Automatik', power_kw: 120, power_hp: 163, engine_cc: 1499, doors: 5, color: 'Quartz Brown', condition: 'Dobro' },
-    images: ['https://images.unsplash.com/photo-1633578680427-f0aa5a861234?w=800&h=600&fit=crop'],
+    images: ['https://images.unsplash.com/photo-1606220588913-b3aacb4d2f46?w=800&h=600&fit=crop'],
   },
   {
     title: 'Seat Ateca 2.0 TDI 4Drive FR 2019',
@@ -529,7 +529,7 @@ export const seedListings: SeedListing[] = [
     description: 'VW Polo Highline u odličnom stanju. Digitalni instrumenti, ambijentalno osvjetljenje, parkirni senzori, Apple CarPlay.',
     contact_phone: '+385 20 777 888', contact_email: 'vw.dubrovnik@vozila.hr',
     attributes: { make: 'Volkswagen', model: 'Polo 1.0 TSI Highline', year: 2021, mileage: 24000, fuel: 'Benzin', transmission: 'Automatik', power_kw: 70, power_hp: 95, engine_cc: 999, doors: 5, color: 'Silk Blue Metallic', condition: 'Odlično' },
-    images: ['https://images.unsplash.com/photo-1589363460779-cd717d7a82a0?w=800&h=600&fit=crop'],
+    images: ['https://images.unsplash.com/photo-1605559424843-9e4c228bf1c2?w=800&h=600&fit=crop'],
   },
   {
     title: 'Fiat Tipo Cross 1.5 Hybrid 2022',
@@ -538,6 +538,6 @@ export const seedListings: SeedListing[] = [
     description: 'Fiat Tipo Cross Hybrid u najnovijem izdanju. Talijanski crossover s blagim hibridom, 7" touchscreen, Apple CarPlay/Android Auto.',
     contact_phone: '+385 51 333 444', contact_email: 'fiat.rijeka@vozila.hr',
     attributes: { make: 'Fiat', model: 'Tipo Cross 1.5 Hybrid', year: 2022, mileage: 15000, fuel: 'Hibrid', transmission: 'Automatik', power_kw: 96, power_hp: 130, engine_cc: 1499, doors: 5, color: 'Verde Laguna', condition: 'Odlično' },
-    images: ['https://images.unsplash.com/photo-1625231338773-d3e4a3d4f9e7?w=800&h=600&fit=crop'],
+    images: ['https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?w=800&h=600&fit=crop'],
   },
 ];

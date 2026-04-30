@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import { Edit2, Save, X } from 'lucide-react';
+import { onImgError, PLACEHOLDER_CAR } from '../../lib/imageFallback';
 
 interface NativeAdSlotProps {
   adId: string;
@@ -11,7 +12,7 @@ interface NativeAdSlotProps {
 
 export const NativeAdSlot = ({
   adId,
-  defaultImage = 'https://images.unsplash.com/photo-1552820728-8ac41f1ce891?w=800&h=600&fit=crop',
+  defaultImage = PLACEHOLDER_CAR,
   defaultHref = '#',
   isAdmin = false,
 }: NativeAdSlotProps) => {
@@ -94,6 +95,7 @@ export const NativeAdSlot = ({
           src={adImage}
           alt="Promoted content"
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+          onError={onImgError}
         />
 
         {/* Dark Overlay */}

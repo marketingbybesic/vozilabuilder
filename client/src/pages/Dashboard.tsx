@@ -35,10 +35,9 @@ export const Dashboard = () => {
     try {
       setLoading(true);
       
-      // Get current user
+      // Get current user (unauth visit is expected — silently bail to "Login required" UI)
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        console.error('No user authenticated');
         setLoading(false);
         return;
       }

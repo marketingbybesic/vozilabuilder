@@ -12,6 +12,7 @@ import { navigationMenu } from '../../config/taxonomy';
 import { globalFilters, categoryFilters, FilterDefinition } from '../../config/filters';
 import { Listing } from '../../types';
 import { Helmet } from 'react-helmet-async';
+import { onImgError } from '../../lib/imageFallback';
 
 const ITEMS_PER_PAGE = 9;
 
@@ -181,11 +182,13 @@ export const ListingCard = ({ car }: { car: Listing }) => {
               src={displayImg}
               alt={`${car.title} background`}
               className="absolute inset-0 w-full h-full object-cover blur-2xl opacity-30 transition-transform duration-1000 ease-premium"
+              onError={onImgError}
             />
             <img
               src={displayImg}
               alt={car.title}
               className={`absolute inset-0 w-full h-full object-contain p-2 transition-transform duration-1000 ease-premium ${isHovered && sortedImages.length <= 1 ? 'scale-110' : ''}`}
+              onError={onImgError}
             />
           </>
         ) : (

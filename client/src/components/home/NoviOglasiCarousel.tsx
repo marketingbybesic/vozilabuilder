@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Listing } from '../../types';
 import { supabase } from '../../lib/supabase';
+import { onImgError, PLACEHOLDER_CAR } from '../../lib/imageFallback';
 
 const AUTO_SCROLL_INTERVAL = 4000;
 
@@ -189,7 +190,7 @@ export const NoviOglasiCarousel = () => {
         >
           {extendedListings.map((listing, idx) => {
             const images = listing.listing_images || [];
-            const img = images.find((i) => i.is_primary)?.url || images[0]?.url || '/placeholder-car.jpg';
+            const img = images.find((i) => i.is_primary)?.url || images[0]?.url || PLACEHOLDER_CAR;
             return (
               <Link
                 key={`${listing.id}-${idx}`}
@@ -203,6 +204,7 @@ export const NoviOglasiCarousel = () => {
                       alt={listing.title}
                       className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                       loading="lazy"
+                      onError={onImgError}
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                   </div>

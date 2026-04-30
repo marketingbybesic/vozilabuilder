@@ -16,12 +16,12 @@ export const Home = () => {
   useEffect(() => {
     const fetchHomeData = async () => {
       try {
-        // Fetch trending 8 listings (by views)
+        // Fetch trending 8 listings (most recent active — views_count column not in deployed schema)
         const { data: trending } = await supabase
           .from('listings')
           .select('*, listing_images(id, url, is_primary, sort_order)')
           .eq('status', 'active')
-          .order('views_count', { ascending: false })
+          .order('created_at', { ascending: false })
           .limit(8);
 
         setTrendingListings(trending || []);
