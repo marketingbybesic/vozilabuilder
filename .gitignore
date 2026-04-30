@@ -4,10 +4,14 @@ client/node_modules/
 server/node_modules/
 
 # Build outputs
-dist/
+/dist/*
 client/dist/
 server/dist/
 build/
+# Allow Passenger startup file used by Hostinger Node hosting
+!/dist/server/
+/dist/server/*
+!/dist/server/node-build.mjs
 
 # Environment variables
 .env
@@ -36,13 +40,3 @@ lerna-debug.log*
 
 # TypeScript
 *.tsbuildinfo
-node_modules/
-.env
-client/.env
-server/.env
-dist/
-node_modules/
-.env
-client/.env
-server/.env
-dist/
