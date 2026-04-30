@@ -362,6 +362,40 @@ export const ListingDetail = () => {
       <Helmet>
         <title>{seoTitle}</title>
         <meta name="description" content={listing.description?.substring(0, 160) || `${listing.title} — ${listing.location || 'Hrvatska'}. Pronađite ovo vozilo na Vozila.hr.`} />
+        <link rel="canonical" href={listingUrl} />
+        {/* Open Graph */}
+        <meta property="og:type" content="product" />
+        <meta property="og:title" content={seoTitle} />
+        <meta property="og:description" content={listing.description?.substring(0, 200) || listing.title} />
+        <meta property="og:url" content={listingUrl} />
+        {sortedImages[0]?.url && <meta property="og:image" content={sortedImages[0].url} />}
+        <meta property="og:locale" content="hr_HR" />
+        <meta property="og:site_name" content="Vozila.hr" />
+        {/* Twitter */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={seoTitle} />
+        <meta name="twitter:description" content={listing.description?.substring(0, 200) || listing.title} />
+        {sortedImages[0]?.url && <meta name="twitter:image" content={sortedImages[0].url} />}
+        {/* Vehicle JSON-LD (schema.org) */}
+        <script type="application/ld+json">{JSON.stringify({
+          '@context': 'https://schema.org',
+          '@type': 'Product',
+          name: listing.title,
+          description: listing.description || `${listing.title} na Vozila.hr`,
+          image: sortedImages.map((i) => i.url).slice(0, 8),
+          brand: attributes.make ? { '@type': 'Brand', name: attributes.make } : undefined,
+          model: attributes.model || undefined,
+          vehicleModelDate: attributes.year || undefined,
+          fuelType: attributes.fuel || undefined,
+          mileageFromOdometer: attributes.mileage ? { '@type': 'QuantitativeValue', value: attributes.mileage, unitCode: 'KMT' } : undefined,
+          offers: listing.price > 0 ? {
+            '@type': 'Offer',
+            priceCurrency: listing.currency || 'EUR',
+            price: listing.price,
+            availability: listing.status === 'sold' ? 'https://schema.org/SoldOut' : 'https://schema.org/InStock',
+            url: listingUrl,
+          } : undefined,
+        })}</script>
       </Helmet>
 
       {/* Status Badge for Inactive Listings */}

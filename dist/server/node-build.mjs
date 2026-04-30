@@ -124,6 +124,79 @@ Don't promise warranties. Use "EUR" not "€" inside running prose. No emojis.`;
   }
 }
 
+// ---- Sitemap.xml — generated from Supabase ---------------------------------
+const SITE_URL = process.env.PUBLIC_SITE_URL || 'https://testiranje.cloud';
+const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
+const SUPABASE_ANON = process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY;
+const STATIC_PATHS = [
+  '/', '/pretraga', '/za-partnere', '/kontakt', '/privatnost', '/uvjeti-koristenja',
+];
+const CATEGORY_SLUGS = [
+  'osobni-automobili','motocikli','bicikli-romobili','kombiji-laki-teretni',
+  'kamioni-teretna','strojevi','kamperi-karavani','plovila-nautika',
+  'dijelovi-oprema','usluge',
+];
+
+let _sitemapCache = { body: '', ts: 0 };
+const SITEMAP_TTL_MS = 60 * 60 * 1000; // 1 hour
+
+async function buildSitemap() {
+  const now = Date.now();
+  if (_sitemapCache.body && now - _sitemapCache.ts < SITEMAP_TTL_MS) return _sitemapCache.body;
+
+  const urls = [];
+  // Static pages
+  for (const p of STATIC_PATHS) urls.push({ loc: `${SITE_URL}${p}`, priority: p === '/' ? 1.0 : 0.6 });
+  // Category pages
+  for (const c of CATEGORY_SLUGS) urls.push({ loc: `${SITE_URL}/${c}`, priority: 0.8 });
+
+  // Listings — fetch from Supabase REST if env is configured
+  if (SUPABASE_URL && SUPABASE_ANON) {
+    try {
+      const r = await fetch(`${SUPABASE_URL}/rest/v1/listings?select=id,updated_at,status&status=eq.active&order=updated_at.desc&limit=1000`, {
+        headers: { apikey: SUPABASE_ANON, Authorization: `Bearer ${SUPABASE_ANON}` },
+      });
+      if (r.ok) {
+        const rows = await r.json();
+        for (const row of rows) {
+          urls.push({
+            loc: `${SITE_URL}/listing/${row.id}`,
+            lastmod: row.updated_at,
+            priority: 0.9,
+          });
+        }
+      }
+    } catch { /* skip listing inclusion if Supabase fails */ }
+  }
+
+  let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
+  xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
+  for (const u of urls) {
+    xml += `  <url>\n    <loc>${escapeXml(u.loc)}</loc>\n`;
+    if (u.lastmod) xml += `    <lastmod>${u.lastmod}</lastmod>\n`;
+    if (u.priority) xml += `    <priority>${u.priority.toFixed(1)}</priority>\n`;
+    xml += '  </url>\n';
+  }
+  xml += '</urlset>\n';
+  _sitemapCache = { body: xml, ts: now };
+  return xml;
+}
+
+function escapeXml(s) {
+  return String(s).replace(/[<>&'"]/g, (c) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', "'": '&apos;', '"': '&quot;' })[c]);
+}
+
+async function handleSitemap(_req, res) {
+  try {
+    const body = await buildSitemap();
+    res.writeHead(200, { 'Content-Type': 'application/xml; charset=utf-8', 'Cache-Control': 'public, max-age=3600' });
+    res.end(body);
+  } catch (e) {
+    res.writeHead(500, { 'Content-Type': 'text/plain' });
+    res.end('Sitemap error');
+  }
+}
+
 // ----------------------------------------------------------------------------
 
 const server = createServer(async (req, res) => {
@@ -137,6 +210,7 @@ const server = createServer(async (req, res) => {
       res.end(JSON.stringify({ ok: true, ts: Date.now() }));
       return;
     }
+    if (url.pathname === '/sitemap.xml') return handleSitemap(req, res);
 
     const safe = url.pathname.replace(/\.\.+/g, '').replace(/^\/+/, '');
     const direct = join(DIST_DIR, safe);

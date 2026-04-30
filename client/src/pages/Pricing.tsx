@@ -1,165 +1,201 @@
 import { Link } from 'react-router-dom';
-import { Check, Shield, Crown, Building2 } from 'lucide-react';
+import { Helmet } from 'react-helmet-async';
+import { Check, Building2, ShieldCheck, Crown, Sparkles, Zap, BarChart3, Users, Headphones, Globe } from 'lucide-react';
 
-interface PricingTier {
+interface Tier {
+  id: string;
   name: string;
-  price: string;
+  priceEur: number;
   period: string;
-  description: string;
-  features: string[];
-  cta: string;
+  tagline: string;
+  perks: { icon: any; text: string }[];
   highlighted?: boolean;
-  oldPrice?: string;
-  icon: React.ElementType;
+  ctaText: string;
 }
 
-const tiers: PricingTier[] = [
+const tiers: Tier[] = [
   {
-    name: 'Osnovni',
-    price: '0 €',
-    period: 'po oglasu',
-    description: 'Plaćanje po oglasu unaprijed. Standardna vidljivost.',
-    features: [
-      'Plaćanje po oglasu',
-      'Standardna vidljivost',
-      'Osnovne statistike',
-      '30 dana trajanja',
+    id: 'bronze',
+    name: 'Bronze',
+    priceEur: 39,
+    period: 'mjesečno',
+    tagline: 'Idealno za male autosalone i privatne prodavače.',
+    perks: [
+      { icon: Check,        text: 'Do 15 aktivnih oglasa' },
+      { icon: ShieldCheck,  text: 'Verificirani prodavač značka' },
+      { icon: BarChart3,    text: 'Osnovne statistike' },
+      { icon: Sparkles,     text: '10€ Boost kredita mjesečno' },
     ],
-    cta: 'Kontaktirajte nas',
-    icon: Check,
+    ctaText: 'Pokreni Bronze',
   },
   {
-    name: 'Premium',
-    price: 'Mjesečno',
-    period: 'pretplata',
-    description: 'Napredne statistike, verified značka, 50€ kredita.',
-    features: [
-      'Napredne statistike',
-      'Verified Business značka',
-      '50€ kredita uključeno',
-      'Prioritetna podrška',
-      'Viša vidljivost oglasa',
+    id: 'silver',
+    name: 'Silver',
+    priceEur: 99,
+    period: 'mjesečno',
+    tagline: 'Najbolji izbor za rastuće autosalone.',
+    perks: [
+      { icon: Check,        text: 'Do 50 aktivnih oglasa' },
+      { icon: ShieldCheck,  text: 'Verificirani prodavač + Premium značka' },
+      { icon: BarChart3,    text: 'Napredna analitika i lead tracking' },
+      { icon: Sparkles,     text: '40€ Boost kredita mjesečno' },
+      { icon: Zap,          text: 'Prioritetni rangiranje u kategorijama' },
+      { icon: Headphones,   text: 'Brza email podrška (24h)' },
     ],
-    cta: 'Kontaktirajte nas',
     highlighted: true,
-    icon: Shield,
+    ctaText: 'Pokreni Silver',
   },
   {
-    name: 'Partner',
-    price: '3 Godine',
-    period: 'pretplata',
-    description: 'Sve Premium prednosti. Veliki dugoročni popust.',
-    features: [
-      'Sve Premium prednosti',
-      'Maximalna vidljivost',
-      'API pristup (uskoro)',
-      'Dedicated account manager',
-      'Brendirani profil',
+    id: 'gold',
+    name: 'Gold',
+    priceEur: 299,
+    period: 'mjesečno',
+    tagline: 'Bez ograničenja. Vlastiti dashboard, dedicated podrška.',
+    perks: [
+      { icon: Check,        text: 'Neograničeno aktivnih oglasa' },
+      { icon: Crown,        text: 'Brendirani salon profil' },
+      { icon: BarChart3,    text: 'Tjedni izvještaji + API pristup' },
+      { icon: Sparkles,     text: '150€ Boost kredita mjesečno' },
+      { icon: Zap,          text: 'Featured na homepage rotaciji' },
+      { icon: Users,        text: 'Multi-user dashboard za tim' },
+      { icon: Headphones,   text: 'Dedicated account manager' },
+      { icon: Globe,        text: 'Internacionalna distribucija (uskoro)' },
     ],
-    cta: 'Kontaktirajte nas',
-    oldPrice: 'Mjesečno',
-    icon: Crown,
+    ctaText: 'Razgovaraj s timom',
   },
 ];
 
 export const Pricing = () => {
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-7xl mx-auto px-8 py-24">
+      <Helmet>
+        <title>Pretplate za autosalone i prodavače | Vozila.hr</title>
+        <meta name="description" content="Tri jasna paketa za autosalone i prodavače: Bronze 39€/mj, Silver 99€/mj, Gold 299€/mj. Verificirana značka, Boost kreditii, dashboard analitike." />
+      </Helmet>
+
+      <div className="max-w-[1480px] mx-auto px-6 sm:px-10 lg:px-14 py-20 lg:py-28">
         {/* Header */}
-        <div className="text-center mb-20">
-          <div className="inline-flex items-center gap-2 mb-6">
-            <Building2 className="w-5 h-5 text-primary" strokeWidth={1.5} />
-            <span className="text-[10px] font-light uppercase tracking-widest text-primary">
-              Za partnere
-            </span>
-          </div>
-          <h1 className="text-4xl md:text-5xl font-light text-foreground tracking-widest mb-6">
-            Pretplate za prodavače
+        <div className="text-center mb-16 lg:mb-20">
+          <p className="text-[10px] font-light uppercase tracking-[0.35em] text-primary mb-4 inline-flex items-center gap-2 justify-center">
+            <Building2 className="w-3 h-3" strokeWidth={1.5} aria-hidden="true" />
+            Za autosalone i prodavače
+          </p>
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-light uppercase tracking-tight text-foreground mb-5">
+            Tri paketa. Jasna cijena.
           </h1>
-          <p className="text-sm font-light text-muted-foreground max-w-md mx-auto leading-relaxed">
-            Odaberite plan koji odgovara vašem poslovanju. Bez skrivenih troškova.
+          <p className="text-sm font-light text-muted-foreground max-w-xl mx-auto leading-relaxed">
+            Verificirana značka, Boost krediti, analitika. Bez skrivenih troškova. Otkažite kad god želite.
           </p>
         </div>
 
-        {/* Pricing Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {tiers.map((tier) => {
-            const Icon = tier.icon;
-            return (
-              <div
-                key={tier.name}
-                className={`relative border rounded-none p-8 flex flex-col transition-all duration-500 hover:-translate-y-1 ${
+        {/* Tiers */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 lg:gap-5">
+          {tiers.map((tier) => (
+            <div
+              key={tier.id}
+              className={`relative flex flex-col p-6 sm:p-8 border transition-colors ${
+                tier.highlighted ? 'border-primary bg-primary/5' : 'border-border bg-muted/10 hover:border-foreground/40'
+              }`}
+            >
+              {tier.highlighted && (
+                <span className="absolute -top-3 left-6 px-2 py-1 bg-primary text-primary-foreground text-[9px] font-medium uppercase tracking-[0.25em]">
+                  Najpopularnije
+                </span>
+              )}
+
+              <h3 className="text-sm font-light uppercase tracking-[0.25em] text-foreground mb-2">
+                {tier.name}
+              </h3>
+              <p className="text-xs font-light text-muted-foreground leading-relaxed mb-6 min-h-[2.5em]">
+                {tier.tagline}
+              </p>
+
+              <div className="mb-6">
+                <div className="flex items-baseline gap-1">
+                  <span className="text-4xl sm:text-5xl font-light text-foreground tabular-nums">
+                    {tier.priceEur}
+                  </span>
+                  <span className="text-base text-muted-foreground">€</span>
+                </div>
+                <p className="text-[10px] font-light uppercase tracking-[0.25em] text-muted-foreground mt-1">
+                  {tier.period} · isključujući PDV
+                </p>
+              </div>
+
+              {/* Hairline */}
+              <div className="h-px bg-border mb-6" />
+
+              <ul className="flex-1 space-y-3 mb-8">
+                {tier.perks.map((p) => {
+                  const Icon = p.icon;
+                  return (
+                    <li key={p.text} className="flex items-start gap-3 text-xs font-light text-foreground/85 leading-snug">
+                      <Icon className="w-3.5 h-3.5 text-primary mt-0.5 flex-shrink-0" strokeWidth={1.5} />
+                      <span>{p.text}</span>
+                    </li>
+                  );
+                })}
+              </ul>
+
+              <Link
+                to="/kontakt"
+                className={`block text-center px-5 py-3 text-[10px] font-light uppercase tracking-[0.25em] transition-colors ${
                   tier.highlighted
-                    ? 'bg-primary/5 border-primary/40'
-                    : 'bg-white/5 border-border hover:border-white/20'
+                    ? 'bg-primary text-primary-foreground hover:bg-primary/90'
+                    : 'border border-foreground text-foreground hover:bg-foreground hover:text-background'
                 }`}
               >
-                {tier.highlighted && (
-                  <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 px-4 py-1 bg-primary text-black text-[10px] font-light uppercase tracking-widest">
-                    Preporučeno
-                  </div>
-                )}
-
-                <div className="mb-8">
-                  <div className="w-12 h-12 bg-white/5 border border-border rounded-none flex items-center justify-center mb-6">
-                    <Icon className="w-6 h-6 text-foreground" strokeWidth={1.5} />
-                  </div>
-                  <h3 className="text-lg font-light text-foreground tracking-widest mb-2">
-                    {tier.name}
-                  </h3>
-                  <p className="text-sm font-light text-muted-foreground leading-relaxed">
-                    {tier.description}
-                  </p>
-                </div>
-
-                <div className="mb-8">
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-3xl font-light text-foreground tracking-widest">
-                      {tier.price}
-                    </span>
-                    {tier.oldPrice && (
-                      <span className="text-sm font-light text-muted-foreground line-through">
-                        {tier.oldPrice}
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-[10px] font-light uppercase tracking-widest text-muted-foreground mt-1">
-                    {tier.period}
-                  </p>
-                </div>
-
-                <div className="flex-1 space-y-4 mb-8">
-                  {tier.features.map((feature) => (
-                    <div key={feature} className="flex items-start gap-3">
-                      <Check className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" strokeWidth={1.5} />
-                      <span className="text-sm font-light text-muted-foreground">
-                        {feature}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-
-                <Link
-                  to="/kontakt"
-                  className={`block text-center px-8 py-4 text-[11px] font-light uppercase tracking-widest transition-all duration-300 ${
-                    tier.highlighted
-                      ? 'bg-white text-black hover:bg-neutral-200'
-                      : 'bg-white/5 text-foreground border border-border hover:bg-white/10'
-                  }`}
-                >
-                  {tier.cta}
-                </Link>
-              </div>
-            );
-          })}
+                {tier.ctaText}
+              </Link>
+            </div>
+          ))}
         </div>
 
-        {/* Footer note */}
-        <div className="mt-16 text-center">
-          <p className="text-[10px] font-light uppercase tracking-widest text-muted-foreground">
-            Potrebna personalizirana ponuda? Slobodno nas kontaktirajte.
+        {/* Comparison strip */}
+        <div className="mt-20 lg:mt-24 grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+          <div className="p-5 border border-border">
+            <p className="text-[10px] font-light uppercase tracking-[0.3em] text-primary mb-3">Verifikacija</p>
+            <h4 className="text-base font-light uppercase tracking-tight text-foreground mb-2">
+              Vozila Verified Salon
+            </h4>
+            <p className="text-xs font-light text-muted-foreground leading-relaxed">
+              Provjeravamo OIB, sjedište i poslovne reference. Verificirani prodavači imaju 3× više leadova.
+            </p>
+          </div>
+          <div className="p-5 border border-border">
+            <p className="text-[10px] font-light uppercase tracking-[0.3em] text-primary mb-3">Boost krediti</p>
+            <h4 className="text-base font-light uppercase tracking-tight text-foreground mb-2">
+              Iskoristite kako vam odgovara
+            </h4>
+            <p className="text-xs font-light text-muted-foreground leading-relaxed">
+              Boost krediti se troše kako vi odlučite — pojedinačno na svaki oglas. Featured 7 dana = 14,99 €.
+            </p>
+          </div>
+          <div className="p-5 border border-border">
+            <p className="text-[10px] font-light uppercase tracking-[0.3em] text-primary mb-3">Analitika</p>
+            <h4 className="text-base font-light uppercase tracking-tight text-foreground mb-2">
+              Stvarni signali ponašanja
+            </h4>
+            <p className="text-xs font-light text-muted-foreground leading-relaxed">
+              Pregledi, klikovi WhatsAppa, otvaranja kontakata, prosječno vrijeme do prodaje — svaki tjedan u inboxu.
+            </p>
+          </div>
+        </div>
+
+        {/* FAQ-lite footer */}
+        <div className="mt-20 text-center">
+          <h2 className="text-xl sm:text-2xl font-light uppercase tracking-tight text-foreground mb-4">
+            Trebate prilagođenu ponudu?
+          </h2>
+          <p className="text-sm font-light text-muted-foreground max-w-md mx-auto mb-6 leading-relaxed">
+            Veći salon, prilagođen API ili integracija s vašim CRM-om? Razgovarajmo.
           </p>
+          <Link
+            to="/kontakt"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-foreground text-background text-[10px] font-light uppercase tracking-[0.25em] hover:bg-primary hover:text-primary-foreground transition-colors"
+          >
+            Pošalji upit
+          </Link>
         </div>
       </div>
     </div>

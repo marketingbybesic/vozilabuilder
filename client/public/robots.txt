@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /postavke
+Disallow: /predaj-oglas
+Disallow: /create-listing
+Disallow: /mobile-upload
+
+Sitemap: https://vozila.hr/sitemap.xml

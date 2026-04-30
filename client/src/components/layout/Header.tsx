@@ -144,10 +144,10 @@ export const Header = () => {
         </div>
       </div>
 
-      {/* TIER 2: CATEGORY BAR - Desktop Only */}
-      <div className="max-w-7xl mx-auto h-10 hidden lg:flex items-center relative z-50 bg-background border-t border-border">
+      {/* TIER 2: CATEGORY BAR - Desktop Only — horizontally scrollable so 10+ categories fit on smaller laptops */}
+      <div className="max-w-7xl mx-auto h-10 hidden lg:flex items-stretch relative z-50 bg-background border-t border-border overflow-x-auto scrollbar-hide">
         <NavigationMenu.Root className="relative flex-1">
-          <NavigationMenu.List className="flex items-center gap-0 h-full">
+          <NavigationMenu.List className="flex items-center gap-0 h-full whitespace-nowrap">
             {navigationMenu.map((category) => {
               const Icon = category.icon;
               const isActive = activeCategory === category.slug;

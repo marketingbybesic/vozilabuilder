@@ -7,6 +7,7 @@ import {
   Plus, Eye, MoreVertical, Car as CarIcon,
   ToggleLeft, ToggleRight, TrendingUp
 } from 'lucide-react';
+import { matchScore } from '../lib/matchScore';
 
 interface Listing {
   id: string;
@@ -272,6 +273,9 @@ export const Dashboard = () => {
                       Pregledi
                     </th>
                     <th className="text-left px-6 py-4 text-xs font-black uppercase tracking-widest text-neutral-400">
+                      Match Score
+                    </th>
+                    <th className="text-left px-6 py-4 text-xs font-black uppercase tracking-widest text-neutral-400">
                       Status
                     </th>
                     <th className="text-left px-6 py-4 text-xs font-black uppercase tracking-widest text-neutral-400">
@@ -305,6 +309,23 @@ export const Dashboard = () => {
                             {listing.views_count || 0}
                           </span>
                         </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        {(() => {
+                          const ms = matchScore(listing as any);
+                          const tone = ms.band === 'Premium' ? 'text-primary border-primary/40 bg-primary/5'
+                                    : ms.band === 'Solid'   ? 'text-foreground border-foreground/30'
+                                    :                          'text-muted-foreground border-border';
+                          return (
+                            <span
+                              title={ms.reasons.length ? ms.reasons.join(' · ') : 'Osnovni oglas'}
+                              className={`inline-flex items-baseline gap-1 px-2 py-0.5 text-[10px] font-light uppercase tracking-[0.2em] tabular-nums border ${tone}`}
+                            >
+                              <span className="font-medium tabular-nums">{ms.total}</span>
+                              <span className="opacity-60">/100</span>
+                            </span>
+                          );
+                        })()}
                       </td>
                       <td className="px-6 py-4">
                         <span className={`px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest ${getStatusColor(listing.status)}`}>
