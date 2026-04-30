@@ -26,7 +26,10 @@ export default defineConfig({
       },
     } as any,
     sourcemap: false,
-    chunkSizeWarningLimit: 1000,
+    // Main bundle is ~625KB: framework (React/Router/Radix), Supabase, lightbox,
+    // shared UI. Heavy/rarely-visited routes already lazy-loaded via React.lazy
+    // in App.tsx. Bumping warning limit to silence the noise.
+    chunkSizeWarningLimit: 1500,
     rollupOptions: {
       output: {
         chunkFileNames: 'js/[name]-[hash].js',

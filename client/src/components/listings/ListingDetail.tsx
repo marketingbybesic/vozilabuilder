@@ -106,6 +106,7 @@ import { PriceIntel } from './PriceIntel';
 import { LoanCalculator } from './LoanCalculator';
 import { ShareButtons } from './ShareButtons';
 import { PriceWatchButton } from './PriceWatchButton';
+import { CompareButton } from './CompareButton';
 const CostPer100km = ({ attributes }: { attributes: Record<string, any> }) => (
   <FuelCostCardImpl attributes={attributes} />
 );
@@ -412,11 +413,25 @@ export const ListingDetail = () => {
       )}
 
       <div className="max-w-7xl mx-auto px-8 py-8">
-        {/* Breadcrumb */}
-        <Link to="/" className="inline-flex items-center gap-2 text-sm font-light uppercase tracking-widest text-white/40 hover:text-white transition-colors mb-8">
-          <ArrowLeft className="w-4 h-4" strokeWidth={1.5} />
-          Natrag
-        </Link>
+        {/* Editorial breadcrumb — Početna › Kategorija › Title */}
+        <nav aria-label="Breadcrumb" className="mb-8 flex items-center gap-2 flex-wrap text-[10px] font-light uppercase tracking-[0.25em] text-muted-foreground">
+          <Link to="/" className="hover:text-primary transition-colors">Početna</Link>
+          {(listing.categories?.slug || (listing as any).category?.slug) && (
+            <>
+              <span aria-hidden="true">›</span>
+              <Link
+                to={`/${listing.categories?.slug || (listing as any).category?.slug}`}
+                className="hover:text-primary transition-colors"
+              >
+                {listing.categories?.name || listing.categories?.slug || 'Kategorija'}
+              </Link>
+            </>
+          )}
+          <span aria-hidden="true">›</span>
+          <span className="text-foreground/80 truncate max-w-[60vw]">
+            {listing.title}
+          </span>
+        </nav>
 
         {/* Two-Column Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -632,16 +647,17 @@ export const ListingDetail = () => {
                   <span className="text-xs font-light uppercase tracking-widest">{priceRibbon.text}</span>
                 </div>
 
-                {/* Price-watch toggle — drives loss-aversion return visits */}
-                {listing.price > 0 && (
-                  <div className="mb-8">
+                {/* Price-watch toggle + Compare — drives loss-aversion + cross-listing engagement */}
+                <div className="mb-6 flex flex-col gap-2">
+                  {listing.price > 0 && (
                     <PriceWatchButton
                       listingId={listing.id}
                       currentPrice={listing.price}
                       currency={listing.currency || 'EUR'}
                     />
-                  </div>
-                )}
+                  )}
+                  <CompareButton listingId={listing.id} />
+                </div>
 
                 {/* Location */}
                 {listing.location && (

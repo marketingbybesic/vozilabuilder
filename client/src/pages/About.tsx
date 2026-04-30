@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { Sparkles, ShieldCheck, BarChart3, Bell } from 'lucide-react';
+import { Sparkles, ShieldCheck, BarChart3, Bell, Lock, BadgeCheck, Eye, AlertTriangle } from 'lucide-react';
 
 // /o-nama — short editorial brand story. SEO foundation + brand trust.
 export const About = () => {
@@ -44,6 +44,38 @@ export const About = () => {
               </div>
             );
           })}
+        </div>
+
+        {/* Trust band */}
+        <div className="border-t border-border pt-16 mb-20">
+          <p className="text-[10px] font-light uppercase tracking-[0.35em] text-primary mb-3 inline-flex items-center gap-2">
+            <ShieldCheck className="w-3 h-3" strokeWidth={1.5} aria-hidden="true" />
+            Sigurnost na Vozila.hr
+          </p>
+          <h2 className="text-2xl sm:text-3xl font-light uppercase tracking-tight text-foreground mb-8">
+            Trust kao temelj
+          </h2>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
+            {[
+              { icon: BadgeCheck, title: 'Verificirani prodavači', text: 'OIB, sjedište i poslovne reference se provjeravaju prije značke.' },
+              { icon: Lock,        title: 'GDPR-compliant',         text: 'Sve obrade podataka u EU. Konzent banner na svakoj sesiji.' },
+              { icon: Eye,         title: 'Transparentnost',        text: 'Match Score i Cijena u kontekstu vidljivi na svakom oglasu.' },
+              { icon: AlertTriangle, title: 'Anti-fraud',           text: 'Sumnjivi obrasci se automatski označavaju i pregledavaju.' },
+            ].map((b) => {
+              const Icon = b.icon;
+              return (
+                <div key={b.title} className="p-4 lg:p-5 border border-border bg-muted/10">
+                  <Icon className="w-4 h-4 text-primary mb-3" strokeWidth={1.5} aria-hidden="true" />
+                  <h3 className="text-xs font-light uppercase tracking-[0.15em] text-foreground mb-2">
+                    {b.title}
+                  </h3>
+                  <p className="text-[11px] font-light text-muted-foreground leading-relaxed">
+                    {b.text}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
         </div>
 
         <div className="border-t border-border pt-12">

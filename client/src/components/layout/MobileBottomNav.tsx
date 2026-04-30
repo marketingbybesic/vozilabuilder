@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Sun, Moon, Heart, User, Search } from 'lucide-react';
+import { Sun, Moon, Heart, User, Search, ArrowLeftRight } from 'lucide-react';
 import { SuperSearchModal } from '../search/SuperSearchModal';
+import { getCompareIds } from '../../lib/compareList';
 
 export const MobileBottomNav = () => {
   const [isDark, setIsDark] = useState(false);
   const [favoritesCount, setFavoritesCount] = useState(0);
+  const [compareCount, setCompareCount] = useState(0);
   const [searchModalOpen, setSearchModalOpen] = useState(false);
   const [isHidden, setIsHidden] = useState(false);
 
@@ -13,8 +15,18 @@ export const MobileBottomNav = () => {
     const isDarkMode = document.documentElement.classList.contains('dark');
     setIsDark(isDarkMode);
 
-    const savedFavorites = JSON.parse(localStorage.getItem('vozila_favs') || '[]');
-    setFavoritesCount(savedFavorites.length);
+    const refreshCounts = () => {
+      const savedFavorites = JSON.parse(localStorage.getItem('vozila_favs') || '[]');
+      setFavoritesCount(savedFavorites.length);
+      setCompareCount(getCompareIds().length);
+    };
+    refreshCounts();
+    window.addEventListener('vozila:compare-updated', refreshCounts);
+    window.addEventListener('storage', refreshCounts);
+    return () => {
+      window.removeEventListener('vozila:compare-updated', refreshCounts);
+      window.removeEventListener('storage', refreshCounts);
+    };
   }, []);
 
   useEffect(() => {
@@ -72,17 +84,31 @@ export const MobileBottomNav = () => {
 
             {/* Favorites */}
             <Link
-              to="/favorites"
+              to="/favoriti"
               className="relative flex flex-col items-center gap-1 p-2 text-foreground hover:bg-muted rounded-none transition-all duration-300 active:scale-95"
             >
               <Heart className="h-5 w-5" strokeWidth={1.5} />
               {favoritesCount > 0 && (
-                <span className="absolute top-1 right-1 h-4 w-4 bg-white text-primary text-[10px] font-bold flex items-center justify-center rounded-full shadow-md">
+                <span className="absolute top-1 right-1 h-4 w-4 bg-primary text-primary-foreground text-[10px] font-medium flex items-center justify-center rounded-full">
                   {favoritesCount}
                 </span>
               )}
               <span className="text-[8px] font-light uppercase tracking-widest">FAVORITI</span>
             </Link>
+
+            {/* Compare — only when user has at least 1 in compare */}
+            {compareCount > 0 && (
+              <Link
+                to={`/usporedba?ids=${getCompareIds().join(',')}`}
+                className="relative flex flex-col items-center gap-1 p-2 text-foreground hover:bg-muted rounded-none transition-all duration-300 active:scale-95"
+              >
+                <ArrowLeftRight className="h-5 w-5" strokeWidth={1.5} />
+                <span className="absolute top-1 right-1 h-4 w-4 bg-primary text-primary-foreground text-[10px] font-medium flex items-center justify-center rounded-full">
+                  {compareCount}
+                </span>
+                <span className="text-[8px] font-light uppercase tracking-widest">USPOREDI</span>
+              </Link>
+            )}
 
             {/* Profile */}
             <Link
